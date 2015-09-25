@@ -1,6 +1,6 @@
 dependencies:
   post:
-    - go get github.com/laher/goxc
+    - go get -d github.com/laher/goxc
     - goxc -t
 
 deployment:
