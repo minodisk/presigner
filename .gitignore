@@ -24,5 +24,6 @@ _testmain.go
 *.prof
 
 # Domain
+id_rsa
 *.p12
 *.pem
