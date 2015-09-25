@@ -9,4 +9,7 @@ deployment:
       - cp -Rf $HOME/signing-gcs $HOME/.go_workspace/src
       - cd $HOME/.go_workspace/src/signing-gcs
       - goxc -wlc default publish-github -apikey=$GITHUB_ACCESS_TOKEN
+      - goxc bump
       - goxc -bc="linux,windows,darwin"
+      - git commit -m "Bump version"
+      - git push
