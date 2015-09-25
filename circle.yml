@@ -1,14 +1,15 @@
 dependencies:
   post:
     - go get -d github.com/laher/goxc
-    - goxc -t
 
 deployment:
   release:
     branch: release
     commands:
-      - src=$HOME/.go-workspace/src
-      - cp -R $APP_DIR $src
-      - cd $src/$APP_DIR
+      - APP_NAME=signing-gcs
+      - APP_DIR=$HOME/$APP_NAME
+      - SRC_DIR=$HOME/.go_workspace/src
+      - cp -R $APP_DIR $SRC_DIR
+      - cd $SRC_DIR/$APP_NAME
       - goxc -wlc default publish-github -apikey=$GITHUB_ACCESS_TOKEN
       - goxc -bc="linux,windows,darwin"
