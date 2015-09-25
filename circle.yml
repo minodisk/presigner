@@ -6,10 +6,13 @@ deployment:
   release:
     branch: release
     commands:
+      - rm -rf $HOME/.go_workspace/src/signing-gcs
       - cp -Rf $HOME/signing-gcs $HOME/.go_workspace/src
       - cd $HOME/.go_workspace/src/signing-gcs
       - goxc -wlc default publish-github -apikey=$GITHUB_ACCESS_TOKEN
       - goxc bump
       - goxc -bc="linux,windows,darwin"
+      - git comfig --global user.email "daisuke.mino@gmail.com"
+      - git config --global user.name "minodisk"
       - git commit -m "Bump version"
       - git push
