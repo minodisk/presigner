@@ -14,5 +14,5 @@ deployment:
       - goxc -bc="linux,windows,darwin"
       - git config --global user.email "daisuke.mino@gmail.com"
       - git config --global user.name "minodisk"
-      - git commit -m "Bump version"
+      - git commit ".goxc.json" -m "Bump version"
       - git push
