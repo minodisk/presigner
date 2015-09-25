@@ -9,7 +9,7 @@ deployment:
       - APP_NAME=signing-gcs
       - APP_DIR=$HOME/$APP_NAME
       - SRC_DIR=$HOME/.go_workspace/src
-      - cp -R $APP_DIR $SRC_DIR
+      - cp -Rf $APP_DIR $SRC_DIR
       - cd $SRC_DIR/$APP_NAME
       - goxc -wlc default publish-github -apikey=$GITHUB_ACCESS_TOKEN
       - goxc -bc="linux,windows,darwin"
