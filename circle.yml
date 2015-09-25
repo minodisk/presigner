@@ -7,5 +7,8 @@ deployment:
   release:
     branch: release
     commands:
+      - src=$HOME/.go-workspace/src
+      - cp -R $APP_DIR $src
+      - cd $src/$APP_DIR
       - goxc -wlc default publish-github -apikey=$GITHUB_ACCESS_TOKEN
       - goxc -bc="linux,windows,darwin"
