@@ -1,12 +1,11 @@
 dependencies:
   post:
-    - go get github.com/github/hub
-    - npm install -g semver
+    - go get github.com/laher/goxc
+    - goxc -t
 
 deployment:
   release:
     branch: release
     commands:
-      - current=`git describe --abbrev=0 --tags`
-      - next=`semver -i $current`
-      - hub release create $APPNAME "v${next}"
+      - goxc -wlc default publish-github -apikey=$GITHUB_ACCESS_TOKEN
+      - goxc -bc="linux,windows,darwin"

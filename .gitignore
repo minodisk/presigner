@@ -26,3 +26,4 @@ _testmain.go
 # Domain
 *.p12
 *.pem
+.goxc.local.json
