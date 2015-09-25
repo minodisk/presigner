@@ -1,0 +1,16 @@
+dependencies:
+  pre:
+    - brew install hub
+
+test:
+  post:
+    - ls -al
+
+deployment:
+  release:
+    branch: release
+    commands:
+      - version=`git describe --abbrev=0 --tags`
+      - echo $version
+      - ls -al
+      # - hub release create $APPNAME $version
