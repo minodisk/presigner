@@ -1,16 +1,12 @@
 dependencies:
-  pre:
-    - go get github.com/github/hub
-
-test:
   post:
-    - ls -al
+    - go get github.com/github/hub
+    - npm install -g semver
 
 deployment:
   release:
     branch: release
     commands:
-      - version=`git describe --abbrev=0 --tags`
-      - echo $version
-      - ls -al
-      # - hub release create $APPNAME $version
+      - current=`git describe --abbrev=0 --tags`
+      - next=`semver -i $current`
+      - hub release create $APPNAME "v${next}"
