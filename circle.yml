@@ -1,6 +1,6 @@
 dependencies:
   pre:
-    - brew install hub
+    - go get github.com/github/hub
 
 test:
   post:
