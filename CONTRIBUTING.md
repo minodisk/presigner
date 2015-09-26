@@ -1,14 +1,19 @@
 # Contributing
 
-## Branches
+## How to develop for contributers
 
-- `master`: Branch for production. Requires pull request.
-- `release`: Branch for release. Requires pull request.
-- others: Branch for development.
+1. Fork me.
+1. Write code.
+1. Create pull request to `master` branch.
 
-## How to release
+## How to develop for collaborators
+
+1. Create branch.
+1. Write code.
+1. Create pull request to `master` branch.
+
+## How to release for collaborators
 
 1. Create pull request to `release` branch.
-1. Merge pull request.
 
 That's it. CircleCI will build binaries and create [release page](https://github.com/go-microservices/signing-gcs/releases/latest).
