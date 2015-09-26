@@ -1,8 +1,6 @@
 dependencies:
   post:
     - go get -d github.com/laher/goxc
-    - go get github.com/github/hub
-    - hub version
 
 deployment:
   release:
