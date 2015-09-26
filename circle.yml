@@ -1,6 +1,8 @@
 dependencies:
   post:
     - go get -d github.com/laher/goxc
+    - go get github.com/github/hub
+    - hub version
 
 deployment:
   release:
@@ -9,10 +11,10 @@ deployment:
       - rm -rf $HOME/.go_workspace/src/signing-gcs
       - cp -Rf $HOME/signing-gcs $HOME/.go_workspace/src
       - cd $HOME/.go_workspace/src/signing-gcs
-      - goxc -wlc default publish-github -apikey=$GITHUB_ACCESS_TOKEN
+      - goxc -wlc default publish-github -apikey=$GITHUB_TOKEN
       - goxc bump
       - goxc -bc="linux,windows,darwin"
-      - git config --global user.email "daisuke.mino@gmail.com"
-      - git config --global user.name "minodisk"
+      # - git config --global user.email "daisuke.mino@gmail.com"
+      # - git config --global user.name "CircleCI"
       - git commit ".goxc.json" -m "Bump version"
-      - git push
+      - git push origin release
