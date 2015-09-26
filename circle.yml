@@ -14,7 +14,7 @@ deployment:
       - goxc -wlc default publish-github -apikey=$GITHUB_TOKEN
       - goxc bump
       - goxc -bc="linux,windows,darwin"
-      # - git config --global user.email "daisuke.mino@gmail.com"
-      # - git config --global user.name "CircleCI"
+      - git config --global user.email "daisuke.mino@gmail.com"
+      - git config --global user.name "CircleCI"
       - git commit ".goxc.json" -m "Bump version"
       - git push origin release
