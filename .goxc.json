@@ -3,6 +3,7 @@
 		"default",
 		"publish-github"
 	],
+	"PackageVersion": "0.0.1",
 	"TaskSettings": {
 		"publish-github": {
 			"owner": "go-microservices",
