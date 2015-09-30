@@ -9,12 +9,12 @@ import (
 	"os"
 	"testing"
 
-	"github.com/go-microservices/policies/option"
-	"github.com/go-microservices/policies/publisher"
+	"github.com/go-microservices/signing/option"
+	"github.com/go-microservices/signing/publisher"
 )
 
 const (
-	Bucket = "policies-s3-test"
+	Bucket = "signing-test"
 )
 
 func TestMain(m *testing.M) {
@@ -86,9 +86,10 @@ func TestUpload(t *testing.T) {
 	}
 	req.Header.Set("Content-Type", w.FormDataContentType())
 	// req.Header.Set("Content-Length", fmt.Sprintf("%d", reqBody.Len()))
-	fmt.Println("REQUEST+++++")
-	fmt.Printf("%+v", req)
-	fmt.Println("+++++++++++++")
+
+	fmt.Println("----------REQUEST-----------")
+	fmt.Println(string(reqBody.Bytes()))
+	fmt.Println("----------------------------")
 
 	client := &http.Client{}
 	r, err := client.Do(req)
@@ -99,8 +100,13 @@ func TestUpload(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println("RESPONSE+++++")
+
+	fmt.Println("----------RESPONSE----------")
 	fmt.Println(r.StatusCode)
 	fmt.Println(string(resBody))
-	fmt.Println("+++++++++++++")
+	fmt.Println("----------------------------")
+
+	if r.StatusCode != 200 {
+		t.Fatal(string(resBody))
+	}
 }

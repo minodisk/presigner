@@ -19,7 +19,7 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	privateKey, err := ioutil.ReadFile("~/.ssh/signing.pem")
+	privateKey, err := ioutil.ReadFile("/Users/minodisk/.ssh/signing.pem")
 	if err != nil {
 		log.Fatal(err)
 	}
