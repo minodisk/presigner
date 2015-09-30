@@ -1,3 +1,3 @@
-# signing-gcs
+# signing
 
-Singed URL provider for uploading files to Google Cloud Storage
+Publisher of signed URLs to upload files directly to Google Cloud Storage.
