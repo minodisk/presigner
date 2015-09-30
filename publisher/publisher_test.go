@@ -4,18 +4,17 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"testing"
 
-	"github.com/go-microservices/signing/option"
-	"github.com/go-microservices/signing/publisher"
+	"github.com/go-microservices/policies/option"
+	"github.com/go-microservices/policies/publisher"
 )
 
 const (
-	Bucket = "signing-s3-test"
+	Bucket = "policies-s3-test"
 )
 
 func TestMain(m *testing.M) {
@@ -53,24 +52,21 @@ func TestUpload(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	log.Printf("%+v", o)
 
 	content := []byte("foo")
-	resp, err := publisher.Publish(o, publisher.Req{"text/plain", len(content)})
+	p := publisher.Publisher{"text/plain", len(content)}
+	form, err := p.Publish(o.AccessKeyID, o.SecretAccessKey, o.Bucket, o.Duration)
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	log.Printf("%+v", resp.Fields)
-
-	// req, err := http.NewRequest("POST", resp.URL, nil)
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
-
-	var body bytes.Buffer
-
-	w := multipart.NewWriter(&body)
+	var reqBody bytes.Buffer
+	w := multipart.NewWriter(&reqBody)
+	for fieldname, value := range form.Fields {
+		err := w.WriteField(fieldname, value)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
 	part, err := w.CreateFormFile("file", "foo.txt")
 	if err != nil {
 		t.Fatal(err)
@@ -79,43 +75,32 @@ func TestUpload(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for fieldname, value := range resp.Fields {
-		err := w.WriteField(fieldname, value)
-		if err != nil {
-			t.Fatal(err)
-		}
-	}
 	err = w.Close()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	// file, header, err := req.FormFile("file")
-	// // r, err := http.PostForm(resp.URL, resp.Values)
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
-
-	req, err := http.NewRequest("POST", resp.URL, &body)
+	req, err := http.NewRequest("POST", form.URL, &reqBody)
 	if err != nil {
 		t.Fatal(err)
 	}
-	req.Header.Add("Content-Type", w.FormDataContentType())
-
-	// fmt.Println("RESPONSE+++++")
-	// fmt.Println(string(buf))
-	// fmt.Println("+++++++++++++")
+	req.Header.Set("Content-Type", w.FormDataContentType())
+	// req.Header.Set("Content-Length", fmt.Sprintf("%d", reqBody.Len()))
+	fmt.Println("REQUEST+++++")
+	fmt.Printf("%+v", req)
+	fmt.Println("+++++++++++++")
 
 	client := &http.Client{}
 	r, err := client.Do(req)
 	if err != nil {
 		t.Fatal(err)
 	}
-	buf, err := ioutil.ReadAll(r.Body)
+	resBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		t.Fatal(err)
 	}
 	fmt.Println("RESPONSE+++++")
-	fmt.Println(string(buf))
+	fmt.Println(r.StatusCode)
+	fmt.Println(string(resBody))
 	fmt.Println("+++++++++++++")
 }

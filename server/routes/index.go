@@ -7,56 +7,67 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/go-microservices/signing-gcs/option"
-	"github.com/go-microservices/signing-gcs/publisher"
+	"github.com/go-microservices/signing/option"
+	"github.com/go-microservices/signing/publisher"
 )
 
 type Index struct {
-	Options option.Options
+	Options    option.Options
+	PrivateKey []byte
 }
 
 func (i Index) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
+	if !(r.Method == "OPTIONS" || r.Method == "POST") {
 		responseError(w, http.StatusMethodNotAllowed, []error{fmt.Errorf("POST method is allowed")})
 		return
 	}
 
-	buf, err := ioutil.ReadAll(r.Body)
+	header := w.Header()
+	header.Set("Access-Control-Allow-Origin", "*")
+	header.Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+	header.Set("Access-Control-Allow-Headers", "Origin, Content-Type")
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		responseError(w, http.StatusBadRequest, []error{err})
 		return
 	}
 
-	var req publisher.Req
-	err = json.Unmarshal(buf, &req)
+	var p publisher.Publisher
+	err = json.Unmarshal(reqBody, &p)
 	if err != nil {
 		responseError(w, http.StatusBadRequest, []error{err})
 		return
 	}
 
-	resp, err := publisher.Publish(i.Options, req)
+	urlSet, err := p.Publish(i.Options.GoogleAccessID, i.PrivateKey, i.Options.Buckets, i.Options.Duration)
 	if err != nil {
 		responseError(w, http.StatusBadRequest, []error{err})
 		return
 	}
 
-	response(w, http.StatusOK, resp)
+	response(w, http.StatusOK, urlSet)
 }
 
-func response(w http.ResponseWriter, code int, resp publisher.Resp) {
-	j, err := json.Marshal(resp)
+func response(w http.ResponseWriter, code int, body interface{}) {
+	b, err := json.Marshal(body)
 	if err != nil {
-		log.Fatalf("fail to marshal JSON response body: err=%+v, resp=%+v", err, resp)
+		log.Printf("fail to marshal response body as JSON: err=%+v, body=%+v", err, body)
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	w.Header().Add("Content-Type", "application/json")
-	i, err := w.Write(j)
+	_, err = w.Write(b)
 	if err != nil {
-		log.Fatal("fail to write response body: err=%+v, body=%+v", err, j)
+		log.Printf("fail to write response body: err=%+v, body=%+v", err, b)
+		return
 	}
-	log.Printf("write %d bytes", i)
+	log.Printf("success response:", string(b))
 }
 
 func responseError(w http.ResponseWriter, code int, errs []error) {
@@ -64,5 +75,5 @@ func responseError(w http.ResponseWriter, code int, errs []error) {
 	for i, err := range errs {
 		strs[i] = err.Error()
 	}
-	response(w, code, publisher.Resp{Errors: strs})
+	response(w, code, map[string][]string{"errors": strs})
 }

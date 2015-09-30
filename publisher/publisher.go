@@ -4,38 +4,45 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-microservices/signing-gcs/option"
+	"google.golang.org/cloud/storage"
+
+	"github.com/go-microservices/signing/option"
 	"github.com/satori/go.uuid"
 )
 
-type Req struct {
-	ContentType string
-	Size        int
+type Publisher struct {
+	Bucket      string `json:"bucket"`
+	ContentType string `json:"content_type"`
+	MD5         string `json:"md5"`
 }
 
-type Resp struct {
-	URL    string            `json:"url"`
-	Fields map[string]string `json:"fields"`
-	Errors []string          `json:"errors"`
+type URLSet struct {
+	SignedURL string `json:"signed_url"`
+	FileURL   string `json:"file_url"`
 }
 
-func Publish(options option.Options, req Req) (resp Resp, err error) {
+func (p Publisher) Publish(googleAccountID string, privateKey []byte, buckets option.Buckets, duration time.Duration) (urlSet URLSet, err error) {
+	if !buckets.Contains(p.Bucket) {
+		err = fmt.Errorf("Bucket %s is not allowed", p.Bucket)
+		return
+	}
+
+	expiration := time.Now().Add(duration)
 	key := uuid.NewV4().String()
 
-	s, err := NewSign(options.SecretAccessKey, options.Bucket, key, req.Size, req.Size, time.Now().Add(time.Duration(options.Duration)))
+	url, err := storage.SignedURL(p.Bucket, key, &storage.SignedURLOptions{
+		GoogleAccessID: googleAccountID,
+		PrivateKey:     privateKey,
+		Method:         "PUT",
+		Expires:        expiration,
+		ContentType:    p.ContentType,
+		// MD5:            []byte(req.MD5),
+	})
 	if err != nil {
 		return
 	}
 
-	resp = Resp{
-		URL: fmt.Sprintf("https://%s.s3.amazonaws.com/", options.Bucket),
-		Fields: map[string]string{
-			"AWSAccessKeyId": options.AccessKeyID,
-			"policy":         s.Policy,
-			"signature":      s.Signature,
-			"key":            key,
-		},
-	}
-
+	urlSet.SignedURL = url
+	urlSet.FileURL = fmt.Sprintf("https://storage.googleapis.com/%s/%s", p.Bucket, key)
 	return
 }

@@ -3,6 +3,7 @@ package routes_test
 import (
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -18,10 +19,14 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	server = httptest.NewServer(routes.Index{option.Options{}})
+	privateKey, err := ioutil.ReadFile("~/.ssh/signing.pem")
+	if err != nil {
+		log.Fatal(err)
+	}
+	server = httptest.NewServer(routes.Index{option.Options{}, privateKey})
+	defer server.Close()
 	client = &http.Client{}
 	code := m.Run()
-	server.Close()
 	os.Exit(code)
 }
 

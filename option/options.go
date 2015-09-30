@@ -1,23 +1,64 @@
 package option
 
-import "github.com/alecthomas/kingpin"
+import (
+	"strings"
+	"time"
+
+	"github.com/alecthomas/kingpin"
+)
 
 type Options struct {
 	GoogleAccessID string
 	PrivateKeyPath string
+	Buckets        Buckets
 	Port           int
+	Duration       time.Duration
 }
 
 func New(args []string) (o Options, err error) {
-	app := kingpin.New("signing-gcs", "Publisher of singed form data to upload files to Amazon S3")
+	app := kingpin.New("signing", "Publisher of signed URLs to upload files directly to Google Cloud Storage")
 	i := app.Flag("id", "Google Access ID").Short('i').OverrideDefaultFromEnvar("GOOGLE_ACCESS_ID").Required().String()
 	k := app.Flag("key", "Path to private key").Short('k').OverrideDefaultFromEnvar("PRIVATE_KEY_PATH").Required().String()
-	p := app.Flag("port", "Listening port").Short('p').Default("80").Int()
+	b := app.Flag("buckets", "Allowed buckets").Short('b').Default("*").OverrideDefaultFromEnvar("BUCKETS").Required().String()
+	p := app.Flag("port", "Listening port").Short('p').Default("80").OverrideDefaultFromEnvar("PORT").Required().Int()
+	d := app.Flag("duration", "Available duration of published signature").Short('d').Default("1m").Required().Duration()
 	_, err = app.Parse(args)
 	if err != nil {
 		return
 	}
 
-	o = Options{*i, *k, *p}
+	o.GoogleAccessID = *i
+	o.PrivateKeyPath = *k
+	o.Buckets = NewBuckets(*b)
+	o.Port = *p
+	o.Duration = *d
 	return
+}
+
+type Buckets struct {
+	wildcard  bool
+	whitelist []string
+}
+
+func NewBuckets(buckets string) (b Buckets) {
+	b.whitelist = strings.Split(buckets, ",")
+	for _, white := range b.whitelist {
+		if white == "*" {
+			b.wildcard = true
+			break
+		}
+	}
+	return
+}
+
+func (b Buckets) Contains(bucket string) bool {
+	if b.wildcard {
+		return true
+	}
+	for _, white := range b.whitelist {
+		if white == bucket {
+			return true
+		}
+	}
+	return false
 }

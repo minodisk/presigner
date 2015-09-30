@@ -8,11 +8,8 @@ import (
 	"github.com/go-microservices/signing/server/routes"
 )
 
-func Serve(options option.Options) (err error) {
-	http.Handle("/", routes.Index{options})
-	err = http.ListenAndServe(fmt.Sprintf(":%d", options.Port), nil)
-	if err != nil {
-		return
-	}
+func Serve(o option.Options, privateKey []byte) (err error) {
+	http.Handle("/", routes.Index{o, privateKey})
+	err = http.ListenAndServe(fmt.Sprintf(":%d", o.Port), nil)
 	return
 }

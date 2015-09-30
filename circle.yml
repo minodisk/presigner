@@ -6,9 +6,10 @@ deployment:
   release:
     branch: release
     commands:
-      - rm -rf $HOME/.go_workspace/src/signing-gcs
-      - cp -Rf $HOME/signing-gcs $HOME/.go_workspace/src
-      - cd $HOME/.go_workspace/src/signing-gcs
+      - export $APP_NAME=signing
+      - rm -rf $HOME/.go_workspace/src/signing
+      - cp -Rf $HOME/signing $HOME/.go_workspace/src
+      - cd $HOME/.go_workspace/src/signing
       - goxc -wlc default publish-github -apikey=$GITHUB_TOKEN
       - goxc bump
       - goxc -bc="linux,windows,darwin"
