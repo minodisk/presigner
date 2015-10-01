@@ -3,9 +3,6 @@ deployment:
     branch: release
     commands:
       - go get -d github.com/laher/goxc
-      # - rm -rf $HOME/.go_workspace/src/presigner
-      # - cp -Rf $HOME/presigner $HOME/.go_workspace/src
-      # - cd $HOME/.go_workspace/src/presigner
       - goxc -wlc default publish-github -apikey=$GITHUB_TOKEN
       - goxc bump
       - goxc -bc="linux,windows,darwin"
