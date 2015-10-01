@@ -1,12 +1,9 @@
-dependencies:
-  post:
-    - go get -d github.com/laher/goxc
-
 deployment:
   release:
     branch: release
     commands:
       - export APP_NAME=presigner
+      - go get -d github.com/laher/goxc
       - rm -rf $HOME/.go_workspace/src/$APP_NAME
       - cp -Rf $HOME/$APP_NAME $HOME/.go_workspace/src
       - cd $HOME/.go_workspace/src/$APP_NAME
