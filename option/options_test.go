@@ -3,7 +3,7 @@ package option_test
 import (
 	"testing"
 
-	"github.com/go-microservices/signing/option"
+	"github.com/go-microservices/presigner/option"
 )
 
 // func TestRequired(t *testing.T) {

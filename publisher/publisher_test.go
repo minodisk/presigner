@@ -7,12 +7,12 @@ import (
 	"os"
 	"testing"
 
-	"github.com/go-microservices/signing/option"
-	"github.com/go-microservices/signing/publisher"
+	"github.com/go-microservices/presigner/option"
+	"github.com/go-microservices/presigner/publisher"
 )
 
 const (
-	Bucket = "signing-test"
+	Bucket = "presigner-test"
 )
 
 func TestMain(m *testing.M) {
@@ -54,7 +54,7 @@ func TestUpload(t *testing.T) {
 	}
 
 	content := []byte("foo")
-	p := publisher.Publisher{"signing-test", "text/plain"}
+	p := publisher.Publisher{"presigner-test", "text/plain"}
 	urlSet, err := p.Publish(o)
 	if err != nil {
 		t.Fatal(err)

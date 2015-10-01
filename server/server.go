@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/go-microservices/signing/option"
-	"github.com/go-microservices/signing/server/routes"
+	"github.com/go-microservices/presigner/option"
+	"github.com/go-microservices/presigner/server/routes"
 )
 
 func Serve(o option.Options) (err error) {

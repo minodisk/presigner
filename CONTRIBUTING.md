@@ -16,4 +16,4 @@
 
 1. Create pull request to `release` branch.
 
-That's it. CircleCI will build binaries and create [release page](https://github.com/go-microservices/signing-gcs/releases/latest).
+That's it. CircleCI will build binaries and create [release page](https://github.com/go-microservices/presigner-gcs/releases/latest).

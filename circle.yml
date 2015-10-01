@@ -6,10 +6,10 @@ deployment:
   release:
     branch: release
     commands:
-      - export $APP_NAME=signing
-      - rm -rf $HOME/.go_workspace/src/signing
-      - cp -Rf $HOME/signing $HOME/.go_workspace/src
-      - cd $HOME/.go_workspace/src/signing
+      - export $APP_NAME=presigner
+      - rm -rf $HOME/.go_workspace/src/presigner
+      - cp -Rf $HOME/presigner $HOME/.go_workspace/src
+      - cd $HOME/.go_workspace/src/presigner
       - goxc -wlc default publish-github -apikey=$GITHUB_TOKEN
       - goxc bump
       - goxc -bc="linux,windows,darwin"

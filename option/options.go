@@ -18,7 +18,7 @@ type Options struct {
 }
 
 func New(args []string) (o Options, err error) {
-	app := kingpin.New("signing", "Publisher of signed URLs to upload files directly to Google Cloud Storage")
+	app := kingpin.New("presigner", "Publisher of signed URLs to upload files directly to Google Cloud Storage")
 	i := app.Flag("id", "Google Access ID").Short('i').OverrideDefaultFromEnvar("GOOGLE_ACCESS_ID").Required().String()
 	k := app.Flag("key", "Path to private key").Short('k').OverrideDefaultFromEnvar("PRIVATE_KEY_PATH").Required().String()
 	b := app.Flag("buckets", "Allowed buckets").Short('b').Default("*").OverrideDefaultFromEnvar("BUCKETS").String()

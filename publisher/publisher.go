@@ -6,7 +6,7 @@ import (
 
 	"google.golang.org/cloud/storage"
 
-	"github.com/go-microservices/signing/option"
+	"github.com/go-microservices/presigner/option"
 	"github.com/satori/go.uuid"
 )
 

@@ -7,8 +7,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/go-microservices/signing/option"
-	"github.com/go-microservices/signing/publisher"
+	"github.com/go-microservices/presigner/option"
+	"github.com/go-microservices/presigner/publisher"
 )
 
 type Index struct {
