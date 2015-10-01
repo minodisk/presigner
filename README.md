@@ -1,3 +1,3 @@
-# signing-gcs
+# presigner [![Circle CI](https://circleci.com/gh/go-microservices/presigner/tree/master.svg?style=svg)](https://circleci.com/gh/go-microservices/presigner/tree/master)
 
-Singed URL provider for uploading files to Google Cloud Storage
+Publisher of pre-signed URLs to upload files directly to Google Cloud Storage.
