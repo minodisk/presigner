@@ -6,14 +6,14 @@ deployment:
   release:
     branch: release
     commands:
-      - export $APP_NAME=presigner
-      - rm -rf $HOME/.go_workspace/src/presigner
-      - cp -Rf $HOME/presigner $HOME/.go_workspace/src
-      - cd $HOME/.go_workspace/src/presigner
+      - export APP_NAME=presigner
+      - rm -rf $HOME/.go_workspace/src/$APP_NAME
+      - cp -Rf $HOME/$APP_NAME $HOME/.go_workspace/src
+      - cd $HOME/.go_workspace/src/$APP_NAME
       - goxc -wlc default publish-github -apikey=$GITHUB_TOKEN
       - goxc bump
       - goxc -bc="linux,windows,darwin"
-      - git config --global user.email "daisuke.mino@gmail.com"
+      - git config --global user.email "release@circleci.com"
       - git config --global user.name "CircleCI"
       - git commit ".goxc.json" -m "Bump version [ci skip]"
       - git push origin release
