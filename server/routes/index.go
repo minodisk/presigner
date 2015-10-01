@@ -12,8 +12,7 @@ import (
 )
 
 type Index struct {
-	Options    option.Options
-	PrivateKey []byte
+	Options option.Options
 }
 
 func (i Index) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -44,7 +43,7 @@ func (i Index) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	urlSet, err := p.Publish(i.Options.GoogleAccessID, i.PrivateKey, i.Options.Buckets, i.Options.Duration)
+	urlSet, err := p.Publish(i.Options)
 	if err != nil {
 		responseError(w, http.StatusBadRequest, []error{err})
 		return

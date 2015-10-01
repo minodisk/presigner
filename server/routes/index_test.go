@@ -19,11 +19,12 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	privateKey, err := ioutil.ReadFile("/Users/minodisk/.ssh/signing.pem")
+	o, err := option.New([]string{})
 	if err != nil {
 		log.Fatal(err)
 	}
-	server = httptest.NewServer(routes.Index{option.Options{}, privateKey})
+
+	server = httptest.NewServer(routes.Index{o})
 	defer server.Close()
 	client = &http.Client{}
 	code := m.Run()

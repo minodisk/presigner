@@ -1,6 +1,7 @@
 package option
 
 import (
+	"io/ioutil"
 	"strings"
 	"time"
 
@@ -10,6 +11,7 @@ import (
 type Options struct {
 	GoogleAccessID string
 	PrivateKeyPath string
+	PrivateKey     []byte
 	Buckets        Buckets
 	Port           int
 	Duration       time.Duration
@@ -32,6 +34,15 @@ func New(args []string) (o Options, err error) {
 	o.Buckets = NewBuckets(*b)
 	o.Port = *p
 	o.Duration = *d
+	return
+}
+
+func (o *Options) ReadPrivateKey() (err error) {
+	privateKey, err := ioutil.ReadFile(o.PrivateKeyPath)
+	if err != nil {
+		return
+	}
+	o.PrivateKey = privateKey
 	return
 }
 

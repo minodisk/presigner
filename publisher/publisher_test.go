@@ -2,9 +2,7 @@ package publisher_test
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
-	"mime/multipart"
 	"net/http"
 	"os"
 	"testing"
@@ -46,50 +44,32 @@ func TestMain(m *testing.M) {
 }
 
 func TestUpload(t *testing.T) {
-	o, err := option.New([]string{
-		"-b", Bucket,
-	})
+	o, err := option.New([]string{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = o.ReadPrivateKey()
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	content := []byte("foo")
-	p := publisher.Publisher{"text/plain", len(content)}
-	form, err := p.Publish(o.AccessKeyID, o.SecretAccessKey, o.Bucket, o.Duration)
+	p := publisher.Publisher{"signing-test", "text/plain"}
+	urlSet, err := p.Publish(o)
 	if err != nil {
 		t.Fatal(err)
 	}
 	var reqBody bytes.Buffer
-	w := multipart.NewWriter(&reqBody)
-	for fieldname, value := range form.Fields {
-		err := w.WriteField(fieldname, value)
-		if err != nil {
-			t.Fatal(err)
-		}
-	}
-	part, err := w.CreateFormFile("file", "foo.txt")
+	reqBody.Write(content)
+	req, err := http.NewRequest("PUT", urlSet.SignedURL, &reqBody)
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = part.Write(content)
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = w.Close()
-	if err != nil {
-		t.Fatal(err)
-	}
+	req.Header.Set("Content-Type", "text/plain")
 
-	req, err := http.NewRequest("POST", form.URL, &reqBody)
-	if err != nil {
-		t.Fatal(err)
-	}
-	req.Header.Set("Content-Type", w.FormDataContentType())
-	// req.Header.Set("Content-Length", fmt.Sprintf("%d", reqBody.Len()))
-
-	fmt.Println("----------REQUEST-----------")
-	fmt.Println(string(reqBody.Bytes()))
-	fmt.Println("----------------------------")
+	// fmt.Println("----------REQUEST-----------")
+	// fmt.Println(string(reqBody.Bytes()))
+	// fmt.Println("----------------------------")
 
 	client := &http.Client{}
 	r, err := client.Do(req)
@@ -101,10 +81,10 @@ func TestUpload(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	fmt.Println("----------RESPONSE----------")
-	fmt.Println(r.StatusCode)
-	fmt.Println(string(resBody))
-	fmt.Println("----------------------------")
+	// fmt.Println("----------RESPONSE----------")
+	// fmt.Println(r.StatusCode)
+	// fmt.Println(string(resBody))
+	// fmt.Println("----------------------------")
 
 	if r.StatusCode != 200 {
 		t.Fatal(string(resBody))
