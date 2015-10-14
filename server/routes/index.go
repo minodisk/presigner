@@ -16,7 +16,18 @@ type Index struct {
 }
 
 func (i Index) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if !(r.Method == "OPTIONS" || r.Method == "POST") {
+	switch r.Method {
+	case "GET":
+		w.Header().Set("Content-Type", "text/html")
+		w.WriteHeader(http.StatusOK)
+		b := []byte("<html><body><a href=\"https://github.com/go-microservices/presigner\">Presigner</a> is working.</body></html>")
+		_, err := w.Write(b)
+		if err != nil {
+			log.Printf("fail to write response body: err=%+v, body=%+v", err, b)
+			return
+		}
+		return
+	case "OPTIONS", "POST":
 		responseError(w, http.StatusMethodNotAllowed, []error{fmt.Errorf("POST method is allowed")})
 		return
 	}
