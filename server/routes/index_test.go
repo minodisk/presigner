@@ -32,7 +32,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestNotAllowedMethods(t *testing.T) {
-	for _, method := range []string{"GET", "PUT", "DELETE"} {
+	for _, method := range []string{"PUT", "DELETE"} {
 		req, err := http.NewRequest(method, server.URL, nil)
 		if err != nil {
 			t.Fatal(err)
