@@ -28,6 +28,8 @@ func (i Index) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	case "OPTIONS", "POST":
+		// do nothing
+	default:
 		responseError(w, http.StatusMethodNotAllowed, []error{fmt.Errorf("POST method is allowed")})
 		return
 	}
