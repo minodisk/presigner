@@ -1,0 +1,11 @@
+[
+  {
+    "origin": ["*"],
+    "responseHeader": [
+      "Content-Type",
+      "Content-MD5"
+    ],
+    "method": ["OPTIONS", "PUT"],
+    "maxAgeSeconds": 3600
+  }
+]
