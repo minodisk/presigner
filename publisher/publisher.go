@@ -13,7 +13,7 @@ import (
 type Publisher struct {
 	Bucket      string `json:"bucket"`
 	ContentType string `json:"content_type"`
-	// MD5         string `json:"md5"`
+	Filename    string `json:"filename"`
 }
 
 type URLSet struct {
@@ -34,14 +34,17 @@ func (p Publisher) Publish(o option.Options) (urlSet URLSet, err error) {
 	expiration := time.Now().Add(o.Duration)
 	key := uuid.NewV4().String()
 
-	url, err := storage.SignedURL(p.Bucket, key, &storage.SignedURLOptions{
+	opts := &storage.SignedURLOptions{
 		GoogleAccessID: o.GoogleAccessID,
 		PrivateKey:     o.PrivateKey,
 		Method:         "PUT",
 		Expires:        expiration,
 		ContentType:    p.ContentType,
-		// MD5:            []byte(req.MD5),
-	})
+	}
+	if p.Filename != "" {
+		opts.Headers = append(opts.Headers, fmt.Sprintf("Content-Disposition:attachment; filename=%s", p.Filename))
+	}
+	url, err := storage.SignedURL(p.Bucket, key, opts)
 	if err != nil {
 		return
 	}

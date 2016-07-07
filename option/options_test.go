@@ -2,16 +2,10 @@ package option_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/go-microservices/presigner/option"
 )
-
-// func TestRequired(t *testing.T) {
-// 	_, err := option.New([]string{})
-// 	if err == nil {
-// 		t.Error("should error without required flags")
-// 	}
-// }
 
 func TestUnknown(t *testing.T) {
 	_, err := option.New([]string{"-x"})
@@ -37,5 +31,8 @@ func TestDefault(t *testing.T) {
 	}
 	if o.Port != 80 {
 		t.Error("wrong Port:", o.Port)
+	}
+	if o.Duration != time.Minute {
+		t.Error("wrong Duration:", o.Duration)
 	}
 }
