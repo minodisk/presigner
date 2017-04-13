@@ -1,0 +1,12 @@
+version: '2'
+
+services:
+
+  presigner:
+    build: .
+    env_file: secret.env
+    environment:
+      PRESIGNER_PORT: 8080
+    volumes:
+      - .:/go/src/github.com/minodisk/presigner
+    command: sh test.sh

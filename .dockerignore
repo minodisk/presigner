@@ -1,0 +1,16 @@
+# Docker
+Dockerfile
+docker-compose.yml
+
+# Git
+.gitignore
+.git
+
+# CI
+codeship*
+
+# Credential
+*.p12
+*.pem
+*.aes
+*.env
