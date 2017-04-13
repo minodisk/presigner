@@ -3,21 +3,23 @@ package options
 import (
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 type Options struct {
-	GoogleAccessID string
-	PrivateKeyPath string
-	Buckets        Buckets
-	Port           int
-	Duration       time.Duration
+	Buckets         Buckets
+	Duration        time.Duration
+	GoogleAuthEmail string
+	GoogleAuthKey   string
+	Port            int
 }
 
 func New(args []string) (Options, error) {
-	var o Options
-	o.Buckets = Buckets{}
+	o := Options{Buckets: Buckets{}}
 	fs := flag.NewFlagSet("presigner", flag.ContinueOnError)
 	fs.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage:\n")
@@ -26,10 +28,34 @@ func New(args []string) (Options, error) {
 		fmt.Fprintf(os.Stderr, "Options:\n")
 		fs.PrintDefaults()
 	}
-	fs.StringVar(&o.GoogleAccessID, "id", "", "Google Access ID")
-	fs.StringVar(&o.PrivateKeyPath, "key", "/secret/google-auth.json", "Path to private key")
-	fs.Var(&o.Buckets, "bucket", "allowed buckets")
-	fs.IntVar(&o.Port, "port", 80, "listening port")
-	fs.DurationVar(&o.Duration, "duration", time.Minute, "Available duration of published signature")
-	return o, fs.Parse(args)
+	fs.Var(&o.Buckets, "bucket", `Allowed buckets to publish pre-signed URL.
+         When this flag is empty, allows any buckets to publish.
+         You can set multi bucket with:
+            $ presigner -bucket foo -bucket bar`)
+	fs.DurationVar(&o.Duration, "duration", time.Minute, `Available duration of published signature.
+         `)
+	fs.StringVar(&o.GoogleAuthEmail, "email", "", `Google service account client email address
+         from the Google Developers Console in the form of
+         "xxx@developer.gserviceaccount.com".`)
+	fs.StringVar(&o.GoogleAuthKey, "key", "", `Google service account private key
+         generated from P12 file with:
+            $ openssl pkcs12 -in key.p12 -passin pass:notasecret -out key.pem -nodes`)
+	var keyPath string
+	fs.StringVar(&keyPath, "keypath", "", `Path to Google service account private key.
+         When -key isn't specified, load -keypath file.`)
+	fs.IntVar(&o.Port, "port", 80, `Listening port.
+         `)
+	if err := fs.Parse(args); err != nil {
+		return o, err
+	}
+
+	if o.GoogleAuthKey == "" && keyPath != "" {
+		key, err := ioutil.ReadFile(keyPath)
+		if err != nil {
+			return o, errors.Wrap(err, "fail to read key path")
+		}
+		o.GoogleAuthKey = string(key)
+	}
+
+	return o, nil
 }

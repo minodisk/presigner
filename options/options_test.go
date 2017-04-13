@@ -40,11 +40,11 @@ func TestFullfillment(t *testing.T) {
 			"default",
 			[]string{},
 			options.Options{
-				"",
-				"/secret/google-auth.json",
 				options.Buckets{},
-				80,
 				time.Minute,
+				"",
+				"",
+				80,
 			},
 		},
 		{
@@ -54,33 +54,33 @@ func TestFullfillment(t *testing.T) {
 				"-bucket", "bucket-b",
 			},
 			options.Options{
-				"",
-				"/secret/google-auth.json",
 				options.Buckets{
 					"bucket-a",
 					"bucket-b",
 				},
-				80,
 				time.Minute,
+				"",
+				"",
+				80,
 			},
 		},
 		{
 			"complex",
 			[]string{
-				"-id", "foo",
-				"-key", "./bar.json",
 				"-bucket", "bucket-a",
-				"-port", "8080",
 				"-duration", "1h",
+				"-email", "foo",
+				"-key", "xxxxxxxxxx",
+				"-port", "8080",
 			},
 			options.Options{
-				"foo",
-				"./bar.json",
 				options.Buckets{
 					"bucket-a",
 				},
-				8080,
 				time.Hour,
+				"foo",
+				"xxxxxxxxxx",
+				8080,
 			},
 		},
 	} {
