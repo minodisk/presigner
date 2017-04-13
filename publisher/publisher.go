@@ -28,7 +28,7 @@ type Result struct {
 func (p Publisher) Publish(o options.Options) (Result, error) {
 	var res Result
 
-	privateKey, err := ioutil.ReadFile(o.PrivateKeyPath)
+	privateKey, err := ioutil.ReadFile(o.GoogleAuthKey)
 	if err != nil {
 		return res, errors.Wrap(err, "fail to read private key")
 	}
@@ -39,7 +39,7 @@ func (p Publisher) Publish(o options.Options) (Result, error) {
 
 	expiration := time.Now().Add(o.Duration)
 	opts := storage.SignedURLOptions{
-		GoogleAccessID: o.GoogleAccessID,
+		GoogleAccessID: o.GoogleAuthEmail,
 		PrivateKey:     privateKey,
 		Method:         "PUT",
 		Expires:        expiration,

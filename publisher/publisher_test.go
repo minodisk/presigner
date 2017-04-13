@@ -42,10 +42,10 @@ func TestUpload(t *testing.T) {
 		Bucket:      Bucket,
 		ContentType: "text/plain",
 	}.Publish(options.Options{
-		GoogleAccessID: GoogleAccessID,
-		PrivateKeyPath: PrivateKeyPath,
-		Buckets:        options.Buckets{Bucket},
-		Duration:       time.Minute,
+		GoogleAuthEmail: GoogleAccessID,
+		GoogleAuthKey:   PrivateKeyPath,
+		Buckets:         options.Buckets{Bucket},
+		Duration:        time.Minute,
 	})
 	if err != nil {
 		t.Fatalf("fail to publish: %v", err)
