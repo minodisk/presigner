@@ -2,57 +2,65 @@ package publisher
 
 import (
 	"fmt"
+	"io/ioutil"
 	"time"
 
-	"google.golang.org/cloud/storage"
+	"cloud.google.com/go/storage"
 
-	"github.com/minodisk/presigner/option"
+	"github.com/minodisk/presigner/options"
+	"github.com/pkg/errors"
 	"github.com/satori/go.uuid"
 )
 
 type Publisher struct {
+	Filename    string   `json:"filename"`
 	Bucket      string   `json:"bucket"`
 	ContentType string   `json:"content_type"`
-	MD5         string   `json:"md5"`
 	Headers     []string `json:"headers"`
+	MD5         string   `json:"md5"`
 }
 
-type URLSet struct {
+type Result struct {
 	SignedURL string `json:"signed_url"`
 	FileURL   string `json:"file_url"`
 }
 
-func (p Publisher) Publish(o option.Options) (urlSet URLSet, err error) {
-	if len(o.PrivateKey) == 0 {
-		err = fmt.Errorf("requires private key bytes")
-		return
+func (p Publisher) Publish(o options.Options) (Result, error) {
+	var res Result
+
+	privateKey, err := ioutil.ReadFile(o.PrivateKeyPath)
+	if err != nil {
+		return res, errors.Wrap(err, "fail to read private key")
 	}
 	if !o.Buckets.Contains(p.Bucket) {
-		err = fmt.Errorf("bucket '%s' is not allowed", p.Bucket)
-		return
+		err = fmt.Errorf("the bucket %s is not allowed to sign", p.Bucket)
+		return res, err
 	}
 
 	expiration := time.Now().Add(o.Duration)
-	key := uuid.NewV4().String()
-
 	opts := storage.SignedURLOptions{
 		GoogleAccessID: o.GoogleAccessID,
-		PrivateKey:     o.PrivateKey,
+		PrivateKey:     privateKey,
 		Method:         "PUT",
 		Expires:        expiration,
 		ContentType:    p.ContentType,
 		Headers:        p.Headers,
+		// Headers: append(
+		// 	p.Headers,
+		// 	fmt.Sprintf("Content-Disposition:attachment; filename=%s", p.Filename),
+		// ),
 	}
 	if p.MD5 != "" {
 		opts.MD5 = []byte(p.MD5)
 	}
+	fmt.Println("MD5:", opts.MD5)
 
+	key := uuid.NewV4().String()
 	url, err := storage.SignedURL(p.Bucket, key, &opts)
 	if err != nil {
-		return
+		return res, errors.Wrap(err, "fail to sign")
 	}
-
-	urlSet.SignedURL = url
-	urlSet.FileURL = fmt.Sprintf("https://storage.googleapis.com/%s/%s", p.Bucket, key)
-	return
+	res.SignedURL = url
+	res.FileURL = fmt.Sprintf("https://storage.googleapis.com/%s/%s", p.Bucket, key)
+	return res, nil
 }
