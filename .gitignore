@@ -23,7 +23,8 @@ _testmain.go
 *.test
 *.prof
 
-# Domain
-id_rsa
+# Credential
 *.p12
 *.pem
+*.aes
+*.env
