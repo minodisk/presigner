@@ -70,7 +70,7 @@ func TestFullfillment(t *testing.T) {
 				"-bucket", "bucket-a",
 				"-duration", "1h",
 				"-email", "foo",
-				"-key", "xxxxxxxxxx",
+				"-key", `xxxxxxxxxx\nyyyyyyyyyy\nzzzzzzzzzz\n`,
 				"-port", "8080",
 			},
 			options.Options{
@@ -79,7 +79,7 @@ func TestFullfillment(t *testing.T) {
 				},
 				time.Hour,
 				"foo",
-				"xxxxxxxxxx",
+				"xxxxxxxxxx\nyyyyyyyyyy\nzzzzzzzzzz\n",
 				8080,
 			},
 		},

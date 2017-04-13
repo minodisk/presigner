@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"strings"
 	"testing"
 	"time"
 
@@ -13,40 +12,34 @@ import (
 	"github.com/minodisk/presigner/publisher"
 )
 
-const (
-	PrivateKeyPath = "./google-auth.pem"
-)
-
 var (
 	GoogleAccessID = os.Getenv("GOOGLE_AUTH_EMAIL")
 	PrivateKey     = os.Getenv("GOOGLE_AUTH_KEY")
-	Bucket         = os.Getenv("BUCKET")
+	Bucket         = os.Getenv("PRESIGNER_BUCKET")
 )
 
 func TestMain(m *testing.M) {
-	pem := strings.Replace(PrivateKey, `\n`, "\n", -1)
-	if err := ioutil.WriteFile(PrivateKeyPath, []byte(pem), 0664); err != nil {
-		panic(err)
-	}
 	code := m.Run()
-	if err := os.Remove(PrivateKeyPath); err != nil {
-		panic(err)
-	}
 	os.Exit(code)
 }
 
 func TestUpload(t *testing.T) {
 	want := "test"
+	opt, err := options.Options{
+		GoogleAuthEmail: GoogleAccessID,
+		GoogleAuthKey:   PrivateKey,
+		Buckets:         options.Buckets{Bucket},
+		Duration:        time.Minute,
+	}.InitializeGoogleAuthKey("")
+	if err != nil {
+		t.Fatalf("fail to initialize GoogleAuthKey: %v", err)
+	}
+
 	res, err := publisher.Publisher{
 		Filename:    "test.txt",
 		Bucket:      Bucket,
 		ContentType: "text/plain",
-	}.Publish(options.Options{
-		GoogleAuthEmail: GoogleAccessID,
-		GoogleAuthKey:   PrivateKeyPath,
-		Buckets:         options.Buckets{Bucket},
-		Duration:        time.Minute,
-	})
+	}.Publish(opt)
 	if err != nil {
 		t.Fatalf("fail to publish: %v", err)
 	}

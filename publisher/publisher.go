@@ -2,7 +2,6 @@ package publisher
 
 import (
 	"fmt"
-	"io/ioutil"
 	"time"
 
 	"cloud.google.com/go/storage"
@@ -28,19 +27,17 @@ type Result struct {
 func (p Publisher) Publish(o options.Options) (Result, error) {
 	var res Result
 
-	privateKey, err := ioutil.ReadFile(o.GoogleAuthKey)
-	if err != nil {
-		return res, errors.Wrap(err, "fail to read private key")
+	if p.Bucket == "" {
+		return res, fmt.Errorf("bucket is empty")
 	}
 	if !o.Buckets.Contains(p.Bucket) {
-		err = fmt.Errorf("the bucket %s is not allowed to sign", p.Bucket)
-		return res, err
+		return res, fmt.Errorf("the bucket %s is not allowed to sign", p.Bucket)
 	}
 
 	expiration := time.Now().Add(o.Duration)
 	opts := storage.SignedURLOptions{
 		GoogleAccessID: o.GoogleAuthEmail,
-		PrivateKey:     privateKey,
+		PrivateKey:     []byte(o.GoogleAuthKey),
 		Method:         "PUT",
 		Expires:        expiration,
 		ContentType:    p.ContentType,
@@ -53,13 +50,15 @@ func (p Publisher) Publish(o options.Options) (Result, error) {
 	if p.MD5 != "" {
 		opts.MD5 = []byte(p.MD5)
 	}
-	fmt.Println("MD5:", opts.MD5)
+
+	fmt.Println(o.GoogleAuthKey)
 
 	key := uuid.NewV4().String()
 	url, err := storage.SignedURL(p.Bucket, key, &opts)
 	if err != nil {
 		return res, errors.Wrap(err, "fail to sign")
 	}
+	fmt.Println("->", url)
 	res.SignedURL = url
 	res.FileURL = fmt.Sprintf("https://storage.googleapis.com/%s/%s", p.Bucket, key)
 	return res, nil

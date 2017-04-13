@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -49,13 +50,21 @@ func New(args []string) (Options, error) {
 		return o, err
 	}
 
-	if o.GoogleAuthKey == "" && keyPath != "" {
+	return o.InitializeGoogleAuthKey(keyPath)
+}
+
+func (o Options) InitializeGoogleAuthKey(keyPath string) (Options, error) {
+	if o.GoogleAuthKey != "" {
+		o.GoogleAuthKey = strings.Replace(o.GoogleAuthKey, `\n`, "\n", -1)
+		return o, nil
+	}
+	if keyPath != "" {
 		key, err := ioutil.ReadFile(keyPath)
 		if err != nil {
 			return o, errors.Wrap(err, "fail to read key path")
 		}
 		o.GoogleAuthKey = string(key)
+		return o, nil
 	}
-
 	return o, nil
 }
