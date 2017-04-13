@@ -1,11 +1,16 @@
 [
   {
-    "origin": ["*"],
+    "origin": [
+      "example.com"
+    ],
     "responseHeader": [
       "Content-Type",
       "Content-MD5"
     ],
-    "method": ["OPTIONS", "PUT"],
+    "method": [
+      "OPTIONS",
+      "PUT"
+    ],
     "maxAgeSeconds": 3600
   }
 ]
