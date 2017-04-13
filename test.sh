@@ -11,7 +11,7 @@ for d in $(go list ./... | grep -v vendor); do
   fi
 done
 
-if [ "$Ci" = "true" ]; then
+if [ "$CI" = "true" ]; then
   curl -o upload.sh https://codecov.io/bash
   bash ./upload.sh
 fi
