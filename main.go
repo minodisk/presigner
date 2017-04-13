@@ -4,37 +4,22 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/minodisk/presigner/option"
+	"github.com/minodisk/presigner/options"
 	"github.com/minodisk/presigner/server"
 )
 
 func main() {
-	err := run()
-	if err != nil {
+	if err := _main(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 }
 
-func run() (err error) {
-	var (
-		o option.Options
-	)
-
-	o, err = option.New(os.Args[1:])
+func _main() error {
+	o, err := options.New(os.Args[1:])
 	if err != nil {
-		return
+		return err
 	}
 
-	err = o.ReadPrivateKey()
-	if err != nil {
-		return
-	}
-
-	err = server.Serve(o)
-	if err != nil {
-		return
-	}
-
-	return
+	return server.Serve(o)
 }
