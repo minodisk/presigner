@@ -1,4 +1,5 @@
-# presigner [ ![Codeship Status for minodisk/presigner](https://app.codeship.com/projects/7e793c10-01bb-0135-39d5-52a787a130cb/status?branch=master)](https://app.codeship.com/projects/212925)
+# presigner [ ![Codeship Status for minodisk/presigner](https://app.codeship.com/projects/7e793c10-01bb-0135-39d5-52a787a130cb/status?branch=master)](https://app.codeship.com/projects/212925) [![Go Report Card](https://goreportcard.com/badge/github.com/minodisk/presigner)](https://goreportcard.com/report/github.com/minodisk/presigner) [![codecov](https://codecov.io/gh/minodisk/presigner/branch/master/graph/badge.svg)](https://codecov.io/gh/minodisk/presigner) [![GoDoc](https://img.shields.io/badge/godoc-reference-5272B4.svg?style=flat)](https://godoc.org/github.com/minodisk/presigner) [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
+
 
 Pre-signed URL publisher to upload files directly to Google Cloud Storage.
 
