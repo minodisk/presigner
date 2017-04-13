@@ -1,0 +1,6 @@
+services:
+
+  presigner:
+    build: .
+    encrypted_env_file: secret.env.encrypted
+    cached: true
