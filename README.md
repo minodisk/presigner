@@ -9,7 +9,7 @@ Pre-signed URL publisher to upload files directly to Google Cloud Storage.
 #### Create a bucket:
 
 ```sh
-gsutil create gs://example-bucket
+gsutil mb gs://example-bucket
 ```
 
 #### Set CORS to the bucket:
