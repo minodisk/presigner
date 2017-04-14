@@ -10,16 +10,15 @@ import (
 
 func main() {
 	if err := _main(); err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }
 
 func _main() error {
-	o, err := options.New(os.Args[1:])
+	o, err := options.Parse(os.Args[1:])
 	if err != nil {
 		return err
 	}
-
 	return server.Serve(o)
 }

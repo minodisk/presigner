@@ -9,21 +9,30 @@ import (
 	"github.com/minodisk/presigner/options"
 )
 
-func TestUndefinedFlags(t *testing.T) {
+func TestParseError(t *testing.T) {
 	t.Parallel()
 	for i, c := range []struct {
+		name string
 		args []string
 	}{
 		{
-			args: []string{"-xxx"},
+			"without -account",
+			[]string{},
+		},
+		{
+			"with undefined flag",
+			[]string{
+				"-account", `{"client_email": "test@example.com", "private_key": "xxxxxxxxxx\nyyyyyyyyyy\nzzzzzzzzzz\n"}`,
+				"-xxx",
+			},
 		},
 	} {
 		c := c
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
 			t.Parallel()
-			_, err := options.New(c.args)
+			_, err := options.Parse(c.args)
 			if err == nil {
-				t.Error("should error with unknown flags")
+				t.Error("should error")
 			}
 		})
 	}
@@ -37,49 +46,57 @@ func TestFullfillment(t *testing.T) {
 		want options.Options
 	}{
 		{
-			"default",
-			[]string{},
+			"with -account",
+			[]string{
+				"-account", `{"client_email": "test@example.com", "private_key": "xxxxxxxxxx\nyyyyyyyyyy\nzzzzzzzzzz\n"}`,
+			},
 			options.Options{
+				options.Account{
+					ClientEmail: "test@example.com",
+					PrivateKey:  "xxxxxxxxxx\nyyyyyyyyyy\nzzzzzzzzzz\n",
+				},
 				options.Buckets{},
 				time.Minute,
-				"",
-				"",
 				80,
 			},
 		},
 		{
 			"multi buckets",
 			[]string{
+				"-account", `{"client_email": "test@example.com", "private_key": "xxxxxxxxxx\nyyyyyyyyyy\nzzzzzzzzzz\n"}`,
 				"-bucket", "bucket-a",
 				"-bucket", "bucket-b",
 			},
 			options.Options{
+				options.Account{
+					ClientEmail: "test@example.com",
+					PrivateKey:  "xxxxxxxxxx\nyyyyyyyyyy\nzzzzzzzzzz\n",
+				},
 				options.Buckets{
 					"bucket-a",
 					"bucket-b",
 				},
 				time.Minute,
-				"",
-				"",
 				80,
 			},
 		},
 		{
 			"complex",
 			[]string{
+				"-account", `{"client_email": "test@example.com", "private_key": "xxxxxxxxxx\nyyyyyyyyyy\nzzzzzzzzzz\n"}`,
 				"-bucket", "bucket-a",
 				"-duration", "1h",
-				"-email", "foo",
-				"-key", `xxxxxxxxxx\nyyyyyyyyyy\nzzzzzzzzzz\n`,
 				"-port", "8080",
 			},
 			options.Options{
+				options.Account{
+					ClientEmail: "test@example.com",
+					PrivateKey:  "xxxxxxxxxx\nyyyyyyyyyy\nzzzzzzzzzz\n",
+				},
 				options.Buckets{
 					"bucket-a",
 				},
 				time.Hour,
-				"foo",
-				"xxxxxxxxxx\nyyyyyyyyyy\nzzzzzzzzzz\n",
 				8080,
 			},
 		},
@@ -87,9 +104,9 @@ func TestFullfillment(t *testing.T) {
 		c := c
 		t.Run(c.name, func(t *testing.T) {
 			t.Parallel()
-			got, err := options.New(c.args)
+			got, err := options.Parse(c.args)
 			if err != nil {
-				t.Fatal("shouldn't error with args: %v", c.args)
+				t.Fatalf("shouldn't error: %v\nwith args: %v", err, c.args)
 			}
 			if !reflect.DeepEqual(got, c.want) {
 				t.Errorf("\n got: %+v\nwant: %+v", got, c.want)

@@ -2,13 +2,14 @@ package server_test
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/minodisk/presigner/options"
 	"github.com/minodisk/presigner/server"
@@ -17,15 +18,23 @@ import (
 var (
 	Server *httptest.Server
 	Client *http.Client
+
+	authJSON = os.Getenv("GOOGLE_AUTH_JSON")
+	bucket   = os.Getenv("PRESIGNER_BUCKET")
+	opts     options.Options
 )
 
 func TestMain(m *testing.M) {
-	o, err := options.New([]string{})
+	var err error
+	opts, err = options.Options{
+		Buckets:  options.Buckets{bucket},
+		Duration: time.Minute,
+	}.FillAccountWithJSON([]byte(authJSON))
 	if err != nil {
-		log.Fatal(err)
+		panic(fmt.Sprintf("fail to initialize GoogleAuthKey: %v", err))
 	}
 
-	Server = httptest.NewServer(server.Index{o})
+	Server = httptest.NewServer(server.Index{opts})
 	defer Server.Close()
 	Client = &http.Client{}
 	code := m.Run()

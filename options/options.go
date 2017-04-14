@@ -1,6 +1,7 @@
 package options
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -12,15 +13,34 @@ import (
 )
 
 type Options struct {
-	Buckets         Buckets
-	Duration        time.Duration
-	GoogleAuthEmail string
-	GoogleAuthKey   string
-	Port            int
+	Account  Account
+	Buckets  Buckets
+	Duration time.Duration
+	Port     int
 }
 
-func New(args []string) (Options, error) {
-	o := Options{Buckets: Buckets{}}
+type Account struct {
+	ClientEmail string `json:"client_email"`
+	PrivateKey  string `json:"private_key"`
+}
+
+func (a *Account) UnmarshalJSON(data []byte) error {
+	type Alias Account
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*a = Account(alias)
+	a.PrivateKey = strings.Replace(a.PrivateKey, `\n`, "\n", -1)
+	return nil
+}
+
+func Parse(args []string) (Options, error) {
+	o := Options{
+		Account: Account{},
+		Buckets: Buckets{},
+	}
+
 	fs := flag.NewFlagSet("presigner", flag.ContinueOnError)
 	fs.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage:\n")
@@ -29,42 +49,38 @@ func New(args []string) (Options, error) {
 		fmt.Fprintf(os.Stderr, "Options:\n")
 		fs.PrintDefaults()
 	}
+	var j string
+	fs.StringVar(&j, "account", "", `Google service account JSON.`)
+	var f string
+	fs.StringVar(&f, "accountfile", "", `Path to Google service account JSON file.
+         When -json isn't specified, load file at -jsonfile.`)
 	fs.Var(&o.Buckets, "bucket", `Allowed buckets to publish pre-signed URL.
          When this flag is empty, allows any buckets to publish.
          You can set multi bucket with:
             $ presigner -bucket foo -bucket bar`)
 	fs.DurationVar(&o.Duration, "duration", time.Minute, `Available duration of published signature.
          `)
-	fs.StringVar(&o.GoogleAuthEmail, "email", "", `Google service account client email address
-         from the Google Developers Console in the form of
-         "xxx@developer.gserviceaccount.com".`)
-	fs.StringVar(&o.GoogleAuthKey, "key", "", `Google service account private key
-         generated from P12 file with:
-            $ openssl pkcs12 -in key.p12 -passin pass:notasecret -out key.pem -nodes`)
-	var keyPath string
-	fs.StringVar(&keyPath, "keypath", "", `Path to Google service account private key.
-         When -key isn't specified, load -keypath file.`)
 	fs.IntVar(&o.Port, "port", 80, `Listening port.
          `)
 	if err := fs.Parse(args); err != nil {
 		return o, err
 	}
 
-	return o.InitializeGoogleAuthKey(keyPath)
+	var b []byte
+	if j != "" {
+		b = []byte(j)
+	} else if f != "" {
+		var err error
+		b, err = ioutil.ReadFile(f)
+		if err != nil {
+			return o, errors.Wrap(err, "fail to read the file of Google service account JSON")
+		}
+	} else {
+		return o, errors.New("Google service account JSON isn't specified")
+	}
+	return o.FillAccountWithJSON(b)
 }
 
-func (o Options) InitializeGoogleAuthKey(keyPath string) (Options, error) {
-	if o.GoogleAuthKey != "" {
-		o.GoogleAuthKey = strings.Replace(o.GoogleAuthKey, `\n`, "\n", -1)
-		return o, nil
-	}
-	if keyPath != "" {
-		key, err := ioutil.ReadFile(keyPath)
-		if err != nil {
-			return o, errors.Wrap(err, "fail to read key path")
-		}
-		o.GoogleAuthKey = string(key)
-		return o, nil
-	}
-	return o, nil
+func (o Options) FillAccountWithJSON(b []byte) (Options, error) {
+	return o, json.Unmarshal(b, &o.Account)
 }

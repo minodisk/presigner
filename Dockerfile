@@ -8,8 +8,7 @@ COPY . .
 RUN go build -o /usr/local/bin/presigner
 
 CMD presigner \
-      -id $GOOGLE_AUTH_EMAIL \
-      -key $GOOGLE_AUTH_KEY \
+      -account $GOOGLE_AUTH_JSON \
       -bucket $PRESIGNER_BUCKET \
       -duration $PRESIGNER_DURATION \
       -port $PRESIGNER_PORT

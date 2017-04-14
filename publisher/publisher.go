@@ -2,6 +2,7 @@ package publisher
 
 import (
 	"fmt"
+	"net/http"
 	"time"
 
 	"cloud.google.com/go/storage"
@@ -36,9 +37,9 @@ func (p Publisher) Publish(o options.Options) (Result, error) {
 
 	expiration := time.Now().Add(o.Duration)
 	opts := storage.SignedURLOptions{
-		GoogleAccessID: o.GoogleAuthEmail,
-		PrivateKey:     []byte(o.GoogleAuthKey),
-		Method:         "PUT",
+		GoogleAccessID: o.Account.ClientEmail,
+		PrivateKey:     []byte(o.Account.PrivateKey),
+		Method:         http.MethodPut,
 		Expires:        expiration,
 		ContentType:    p.ContentType,
 		Headers:        p.Headers,
@@ -51,14 +52,11 @@ func (p Publisher) Publish(o options.Options) (Result, error) {
 		opts.MD5 = []byte(p.MD5)
 	}
 
-	fmt.Println(o.GoogleAuthKey)
-
 	key := uuid.NewV4().String()
 	url, err := storage.SignedURL(p.Bucket, key, &opts)
 	if err != nil {
 		return res, errors.Wrap(err, "fail to sign")
 	}
-	fmt.Println("->", url)
 	res.SignedURL = url
 	res.FileURL = fmt.Sprintf("https://storage.googleapis.com/%s/%s", p.Bucket, key)
 	return res, nil
