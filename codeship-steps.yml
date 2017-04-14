@@ -3,6 +3,6 @@
   command: sh test.sh
 
 - name: release
-  tag: ^(v\d+\.\d+\.\d+)$
+  tag: ^(\d+\.\d+\.\d+)$
   service: presigner
   command: sh release.sh
