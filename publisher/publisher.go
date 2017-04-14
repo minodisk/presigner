@@ -42,17 +42,22 @@ func (p Publisher) Publish(o options.Options) (Result, error) {
 		Method:         http.MethodPut,
 		Expires:        expiration,
 		ContentType:    p.ContentType,
-		Headers:        p.Headers,
 		// Headers: append(
 		// 	p.Headers,
 		// 	fmt.Sprintf("Content-Disposition:attachment; filename=%s", p.Filename),
 		// ),
+	}
+	if len(p.Headers) > 0 {
+		opts.Headers = p.Headers
 	}
 	if p.MD5 != "" {
 		opts.MD5 = []byte(p.MD5)
 	}
 
 	key := uuid.NewV4().String()
+	if o.Verbose {
+		fmt.Printf("Sign with:\n  Bucket: %s\n  Key: %s\n  SingedURLOptions: %+v\n", p.Bucket, key, opts)
+	}
 	url, err := storage.SignedURL(p.Bucket, key, &opts)
 	if err != nil {
 		return res, errors.Wrap(err, "fail to sign")
