@@ -58,6 +58,7 @@ func TestFullfillment(t *testing.T) {
 				options.Buckets{},
 				time.Minute,
 				80,
+				false,
 			},
 		},
 		{
@@ -78,6 +79,7 @@ func TestFullfillment(t *testing.T) {
 				},
 				time.Minute,
 				80,
+				false,
 			},
 		},
 		{
@@ -98,6 +100,7 @@ func TestFullfillment(t *testing.T) {
 				},
 				time.Hour,
 				8080,
+				false,
 			},
 		},
 	} {
