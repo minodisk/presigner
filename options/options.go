@@ -1,15 +1,10 @@
 package options
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
-	"strings"
 	"time"
-
-	"github.com/pkg/errors"
 )
 
 type Options struct {
@@ -18,22 +13,6 @@ type Options struct {
 	Duration time.Duration
 	Port     int
 	Verbose  bool
-}
-
-type Account struct {
-	ClientEmail string `json:"client_email"`
-	PrivateKey  string `json:"private_key"`
-}
-
-func (a *Account) UnmarshalJSON(data []byte) error {
-	type Alias Account
-	var alias Alias
-	if err := json.Unmarshal(data, &alias); err != nil {
-		return err
-	}
-	*a = Account(alias)
-	a.PrivateKey = strings.Replace(a.PrivateKey, `\n`, "\n", -1)
-	return nil
 }
 
 func Parse(args []string) (Options, error) {
@@ -50,11 +29,7 @@ func Parse(args []string) (Options, error) {
 		fmt.Fprintf(os.Stderr, "Options:\n")
 		fs.PrintDefaults()
 	}
-	var j string
-	fs.StringVar(&j, "account", "", `Google service account JSON.`)
-	var f string
-	fs.StringVar(&f, "accountfile", "", `Path to Google service account JSON file.
-         When -account isn't specified, load file at -accountfile.`)
+	fs.Var(&o.Account, "account", `Path to Google service account JSON file.`)
 	fs.Var(&o.Buckets, "bucket", `Allowed buckets to publish pre-signed URL.
          When this flag is empty, allows any buckets to publish.
          You can set multi bucket with:
@@ -65,25 +40,5 @@ func Parse(args []string) (Options, error) {
          `)
 	fs.BoolVar(&o.Verbose, "verbose", false, `Verbose
          `)
-	if err := fs.Parse(args); err != nil {
-		return o, err
-	}
-
-	var b []byte
-	if j != "" {
-		b = []byte(j)
-	} else if f != "" {
-		var err error
-		b, err = ioutil.ReadFile(f)
-		if err != nil {
-			return o, errors.Wrap(err, "fail to read the file of Google service account JSON")
-		}
-	} else {
-		return o, errors.New("Google service account JSON isn't specified")
-	}
-	return o.FillAccountWithJSON(b)
-}
-
-func (o Options) FillAccountWithJSON(b []byte) (Options, error) {
-	return o, json.Unmarshal(b, &o.Account)
+	return o, fs.Parse(args)
 }

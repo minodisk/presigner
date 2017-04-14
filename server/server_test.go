@@ -9,7 +9,6 @@ import (
 	"os"
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/minodisk/presigner/options"
 	"github.com/minodisk/presigner/server"
@@ -26,18 +25,23 @@ var (
 
 func TestMain(m *testing.M) {
 	var err error
-	opts, err = options.Options{
-		Buckets:  options.Buckets{bucket},
-		Duration: time.Minute,
-	}.FillAccountWithJSON([]byte(authJSON))
+	if err := ioutil.WriteFile("google-auth.json", []byte(authJSON), 0644); err != nil {
+		panic(err)
+	}
+	opts, err = options.Parse([]string{
+		"-account", "google-auth.json",
+		"-bucket", bucket,
+	})
 	if err != nil {
-		panic(fmt.Sprintf("fail to initialize GoogleAuthKey: %v", err))
+		panic(fmt.Sprintf("fail to initialize Account: %v", err))
 	}
 
 	Server = httptest.NewServer(server.Index{opts})
 	defer Server.Close()
 	Client = &http.Client{}
+
 	code := m.Run()
+	os.Remove("google-auth.json")
 	os.Exit(code)
 }
 

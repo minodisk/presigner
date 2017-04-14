@@ -1,7 +1,8 @@
 package options_test
 
 import (
-	"fmt"
+	"io/ioutil"
+	"os"
 	"reflect"
 	"testing"
 	"time"
@@ -9,26 +10,36 @@ import (
 	"github.com/minodisk/presigner/options"
 )
 
+const (
+	pathToAccount = "options_test.json"
+)
+
+func TestMain(m *testing.M) {
+	if err := ioutil.WriteFile(pathToAccount, []byte(`{"client_email": "test@example.com", "private_key": "xxxxxxxxxx\nyyyyyyyyyy\nzzzzzzzzzz\n"}`), 0644); err != nil {
+		panic(err)
+	}
+
+	code := m.Run()
+	os.Remove(pathToAccount)
+	os.Exit(code)
+}
+
 func TestParseError(t *testing.T) {
 	t.Parallel()
-	for i, c := range []struct {
+	for _, c := range []struct {
 		name string
 		args []string
 	}{
 		{
-			"without -account",
-			[]string{},
-		},
-		{
 			"with undefined flag",
 			[]string{
-				"-account", `{"client_email": "test@example.com", "private_key": "xxxxxxxxxx\nyyyyyyyyyy\nzzzzzzzzzz\n"}`,
+				"-account", pathToAccount,
 				"-xxx",
 			},
 		},
 	} {
 		c := c
-		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+		t.Run(c.name, func(t *testing.T) {
 			t.Parallel()
 			_, err := options.Parse(c.args)
 			if err == nil {
@@ -48,7 +59,7 @@ func TestFullfillment(t *testing.T) {
 		{
 			"with -account",
 			[]string{
-				"-account", `{"client_email": "test@example.com", "private_key": "xxxxxxxxxx\nyyyyyyyyyy\nzzzzzzzzzz\n"}`,
+				"-account", pathToAccount,
 			},
 			options.Options{
 				options.Account{
@@ -64,7 +75,7 @@ func TestFullfillment(t *testing.T) {
 		{
 			"multi buckets",
 			[]string{
-				"-account", `{"client_email": "test@example.com", "private_key": "xxxxxxxxxx\nyyyyyyyyyy\nzzzzzzzzzz\n"}`,
+				"-account", pathToAccount,
 				"-bucket", "bucket-a",
 				"-bucket", "bucket-b",
 			},
@@ -85,7 +96,7 @@ func TestFullfillment(t *testing.T) {
 		{
 			"complex",
 			[]string{
-				"-account", `{"client_email": "test@example.com", "private_key": "xxxxxxxxxx\nyyyyyyyyyy\nzzzzzzzzzz\n"}`,
+				"-account", pathToAccount,
 				"-bucket", "bucket-a",
 				"-duration", "1h",
 				"-port", "8080",
