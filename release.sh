@@ -1,6 +1,5 @@
 #!/bin/sh
 
-go get -d github.com/laher/goxc
 goxc -wlc default publish-github -apikey=$GITHUB_TOKEN
 # goxc bump
 goxc -bc="linux,windows,darwin"
