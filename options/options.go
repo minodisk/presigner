@@ -17,6 +17,7 @@ type Options struct {
 	Buckets  Buckets
 	Duration time.Duration
 	Port     int
+	Verbose  bool
 }
 
 type Account struct {
@@ -61,6 +62,8 @@ func Parse(args []string) (Options, error) {
 	fs.DurationVar(&o.Duration, "duration", time.Minute, `Available duration of published signature.
          `)
 	fs.IntVar(&o.Port, "port", 80, `Listening port.
+         `)
+	fs.BoolVar(&o.Verbose, "verbose", false, `Verbose
          `)
 	if err := fs.Parse(args); err != nil {
 		return o, err

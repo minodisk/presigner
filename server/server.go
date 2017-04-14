@@ -13,9 +13,12 @@ import (
 )
 
 func Serve(o options.Options) (err error) {
+	if o.Verbose {
+		fmt.Printf("Options: %+v\n", o)
+	}
 	http.Handle("/", Index{o})
-	err = http.ListenAndServe(fmt.Sprintf(":%d", o.Port), nil)
-	return
+	fmt.Printf("listening on port %d\n", o.Port)
+	return http.ListenAndServe(fmt.Sprintf(":%d", o.Port), nil)
 }
 
 type Index struct {
@@ -23,7 +26,29 @@ type Index struct {
 }
 
 func (i Index) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	resp, err := i.process(r.Method, r.Body)
+	resp, err := func(method string, body io.ReadCloser) (*Resp, error) {
+		switch method {
+		default:
+			return nil, NewMethodNotAllowed(method)
+		case http.MethodPost:
+			b, err := ioutil.ReadAll(body)
+			if err != nil {
+				return nil, NewBadRequest(err)
+			}
+			var pub publisher.Publisher
+			if err = json.Unmarshal(b, &pub); err != nil {
+				return nil, NewBadRequest(err)
+			}
+			if i.Options.Verbose {
+				fmt.Printf("Publisher: %+v\n", pub)
+			}
+			res, err := pub.Publish(i.Options)
+			if err != nil {
+				return nil, NewBadRequest(err)
+			}
+			return NewResp(http.StatusOK, res), nil
+		}
+	}(r.Method, r.Body)
 	if err != nil {
 		if coder, ok := err.(Coder); ok {
 			resp = NewErrorResp(coder.Code(), err)
@@ -59,27 +84,4 @@ func (i Index) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("response: %v", string(b))
-}
-
-func (i Index) process(method string, body io.ReadCloser) (*Resp, error) {
-	switch method {
-	default:
-		return nil, NewMethodNotAllowed(method)
-	case "GET", "OPTIONS":
-		return NewResp(http.StatusOK, nil), nil
-	case "POST":
-		b, err := ioutil.ReadAll(body)
-		if err != nil {
-			return nil, NewBadRequest(err)
-		}
-		var pub publisher.Publisher
-		if err = json.Unmarshal(b, &pub); err != nil {
-			return nil, NewBadRequest(err)
-		}
-		res, err := pub.Publish(i.Options)
-		if err != nil {
-			return nil, NewBadRequest(err)
-		}
-		return NewResp(http.StatusOK, res), nil
-	}
 }
