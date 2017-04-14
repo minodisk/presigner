@@ -54,7 +54,7 @@ func Parse(args []string) (Options, error) {
 	fs.StringVar(&j, "account", "", `Google service account JSON.`)
 	var f string
 	fs.StringVar(&f, "accountfile", "", `Path to Google service account JSON file.
-         When -json isn't specified, load file at -jsonfile.`)
+         When -account isn't specified, load file at -accountfile.`)
 	fs.Var(&o.Buckets, "bucket", `Allowed buckets to publish pre-signed URL.
          When this flag is empty, allows any buckets to publish.
          You can set multi bucket with:
