@@ -26,7 +26,7 @@ func TestMain(m *testing.M) {
 		Duration: time.Minute,
 	}.FillAccountWithJSON([]byte(authJSON))
 	if err != nil {
-		panic(fmt.Sprintf("fail to initialize GoogleAuthKey: %v", err))
+		panic(fmt.Sprintf("fail to initialize Account: %v", err))
 	}
 
 	code := m.Run()
@@ -35,11 +35,6 @@ func TestMain(m *testing.M) {
 
 func TestUpload(t *testing.T) {
 	want := "test"
-	fmt.Printf("%+v", publisher.Publisher{
-		Filename:    "test.txt",
-		Bucket:      bucket,
-		ContentType: "text/plain",
-	})
 	res, err := publisher.Publisher{
 		Filename:    "test.txt",
 		Bucket:      bucket,
