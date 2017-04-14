@@ -4,7 +4,7 @@ Pre-signed URL publisher to upload files directly to Google Cloud Storage.
 
 ## Usage
 
-### Setup bucket
+### 1. Setup bucket
 
 #### Create a bucket:
 
@@ -28,19 +28,14 @@ To make objects accessible from any users. See [defacl - Get, set, or change def
 gsutil defacl ch -u AllUsers:R gs://example-bucket
 ```
 
-### Create private key file
+### 2. Generate private key
 
-1. Get p12 key. See https://cloud.google.com/storage/docs/authentication
-1. Convert p12 to private key.
+[Generate JSON private key for service account](https://cloud.google.com/storage/docs/authentication#generating-a-private-key)
 
-```sh
-openssl pkcs12 -in google-auth.p12 -passin pass:notasecret -out google-auth.pem -nodes
-```
-
-### Run
+### 3. Run
 
 ```sh
-presigner -email example@project.iam.gserviceaccount.com -key XXXXXXXXXX -bucket bucket-a -bucket bucket-b
+presigner -account /path/to/private-key.json -bucket bucket-a -port 80
 ```
 
 #### Options:
