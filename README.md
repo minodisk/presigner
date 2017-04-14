@@ -6,13 +6,13 @@ Pre-signed URL publisher to upload files directly to Google Cloud Storage.
 
 ### 1. Setup bucket
 
-#### Create a bucket:
+#### [Required] Create a bucket:
 
 ```sh
 gsutil mb gs://example-bucket
 ```
 
-#### Set CORS to the bucket:
+#### [Optional] Set CORS to the bucket:
 
 To upload from browser with XHR. See [Cross-Origin Resource Sharing (CORS) - Cloud Storage — Google Cloud Platform](https://cloud.google.com/storage/docs/cross-origin).
 
@@ -20,7 +20,7 @@ To upload from browser with XHR. See [Cross-Origin Resource Sharing (CORS) - Clo
 gsutil cors set example-cors.json gs://example-bucket
 ```
 
-#### Set default object ACL to the bucket:
+#### [Optional] Set default object ACL to the bucket:
 
 To make objects accessible from any users. See [defacl - Get, set, or change default ACL on buckets - Cloud Storage — Google Cloud Platform](https://cloud.google.com/storage/docs/gsutil/commands/defacl#ch).
 
@@ -30,7 +30,7 @@ gsutil defacl ch -u AllUsers:R gs://example-bucket
 
 ### 2. Generate private key
 
-[Generate JSON private key for service account](https://cloud.google.com/storage/docs/authentication#generating-a-private-key)
+[Generate JSON private key for service account](https://cloud.google.com/storage/docs/authentication#generating-a-private-key).
 
 ### 3. Run
 
