@@ -8,17 +8,17 @@ import (
 )
 
 type Options struct {
-	Account  Account
-	Buckets  Buckets
-	Duration time.Duration
-	Port     int
-	Verbose  bool
+	Buckets        Buckets
+	Duration       time.Duration
+	Port           int
+	ServiceAccount Account
+	Verbose        bool
 }
 
 func Parse(args []string) (Options, error) {
 	o := Options{
-		Account: Account{},
-		Buckets: Buckets{},
+		ServiceAccount: Account{},
+		Buckets:        Buckets{},
 	}
 
 	fs := flag.NewFlagSet("presigner", flag.ContinueOnError)
@@ -29,16 +29,17 @@ func Parse(args []string) (Options, error) {
 		fmt.Fprintf(os.Stderr, "Options:\n")
 		fs.PrintDefaults()
 	}
-	fs.Var(&o.Account, "account", `Path to Google service account JSON file.`)
 	fs.Var(&o.Buckets, "bucket", `Allowed buckets to publish pre-signed URL.
          When this flag is empty, allows any buckets to publish.
          You can set multi bucket with:
             $ presigner -bucket foo -bucket bar`)
 	fs.DurationVar(&o.Duration, "duration", time.Minute, `Available duration of published signature.
          `)
-	fs.IntVar(&o.Port, "port", 80, `Listening port.
+	fs.IntVar(&o.Port, "port", 80, `TCP address to listen on.
          `)
-	fs.BoolVar(&o.Verbose, "verbose", false, `Verbose
+	fs.Var(&o.ServiceAccount, "account", `Path to the file of Google service account JSON.`)
+	fs.BoolVar(&o.Verbose, "verbose", false, `Verbose output.
          `)
+
 	return o, fs.Parse(args)
 }
