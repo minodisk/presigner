@@ -62,14 +62,14 @@ func TestFullfillment(t *testing.T) {
 				"-account", pathToAccount,
 			},
 			options.Options{
-				options.Account{
+				Buckets:  options.Buckets{},
+				Duration: time.Minute,
+				Port:     80,
+				ServiceAccount: options.Account{
 					ClientEmail: "test@example.com",
 					PrivateKey:  "xxxxxxxxxx\nyyyyyyyyyy\nzzzzzzzzzz\n",
 				},
-				options.Buckets{},
-				time.Minute,
-				80,
-				false,
+				Verbose: false,
 			},
 		},
 		{
@@ -80,17 +80,17 @@ func TestFullfillment(t *testing.T) {
 				"-bucket", "bucket-b",
 			},
 			options.Options{
-				options.Account{
-					ClientEmail: "test@example.com",
-					PrivateKey:  "xxxxxxxxxx\nyyyyyyyyyy\nzzzzzzzzzz\n",
-				},
-				options.Buckets{
+				Buckets: options.Buckets{
 					"bucket-a",
 					"bucket-b",
 				},
-				time.Minute,
-				80,
-				false,
+				Duration: time.Minute,
+				Port:     80,
+				ServiceAccount: options.Account{
+					ClientEmail: "test@example.com",
+					PrivateKey:  "xxxxxxxxxx\nyyyyyyyyyy\nzzzzzzzzzz\n",
+				},
+				Verbose: false,
 			},
 		},
 		{
@@ -102,16 +102,16 @@ func TestFullfillment(t *testing.T) {
 				"-port", "8080",
 			},
 			options.Options{
-				options.Account{
+				Buckets: options.Buckets{
+					"bucket-a",
+				},
+				Duration: time.Hour,
+				Port:     8080,
+				ServiceAccount: options.Account{
 					ClientEmail: "test@example.com",
 					PrivateKey:  "xxxxxxxxxx\nyyyyyyyyyy\nzzzzzzzzzz\n",
 				},
-				options.Buckets{
-					"bucket-a",
-				},
-				time.Hour,
-				8080,
-				false,
+				Verbose: false,
 			},
 		},
 	} {
