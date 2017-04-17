@@ -63,7 +63,7 @@ func TestUpload(t *testing.T) {
 			t.Fatal(err)
 		}
 		if resp.StatusCode/100 != 2 {
-			t.Fatalf("fail to upload:\n%s\n%s", resp.Status, body)
+			t.Errorf("fail to upload:\n%s\n%s", resp.Status, body)
 		}
 	})
 
