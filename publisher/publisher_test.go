@@ -26,6 +26,7 @@ func TestMain(m *testing.M) {
 	opts, err = options.Parse([]string{
 		"-account", "google-auth.json",
 		"-bucket", bucket,
+		"-verbose",
 	})
 	if err != nil {
 		panic(fmt.Sprintf("fail to initialize Account: %v", err))
@@ -38,21 +39,22 @@ func TestMain(m *testing.M) {
 
 func TestUpload(t *testing.T) {
 	want := "test"
-	res, err := publisher.Publisher{
-		Filename:    "test.txt",
+	pub := publisher.Publisher{
 		Bucket:      bucket,
 		ContentType: "text/plain",
-	}.Publish(opts)
+	}
+	res, err := pub.Publish(opts)
 	if err != nil {
 		t.Fatalf("fail to publish: %v", err)
 	}
 
 	t.Run("SignedURL", func(t *testing.T) {
-		req, err := http.NewRequest("PUT", res.SignedURL, bytes.NewBuffer([]byte(want)))
+		req, err := http.NewRequest(http.MethodPut, res.SignedURL, bytes.NewBuffer([]byte(want)))
 		if err != nil {
 			t.Fatal(err)
 		}
 		req.Header.Set("Content-Type", "text/plain")
+		req.Header.Set("Content-Disposition", "attachment; filename=\"test.txt\"")
 		cli := &http.Client{}
 		resp, err := cli.Do(req)
 		if err != nil {

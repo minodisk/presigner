@@ -44,6 +44,56 @@ presigner -account /path/to/private-key.json -bucket bucket-a -port 80
 presigner -help
 ```
 
-## Upload file to GCS with pre-signed URL
+## HTTP(S) API
 
-TODO: Add link to GCS document
+### Publish signed-URL
+
+#### Request Body:
+
+```json
+{
+  "bucket": "example",
+  "content_type": "image/jpeg",
+  "md5": "XXXXXXXXXXXXXXXXXXXX"
+}
+```
+
+- `bucket`: Bucket name to upload file.
+- `content_type`: Content type of the file.
+- `md5`: [Optional] MD5 checksum of the file.
+
+#### Response Body:
+
+```json
+{
+  "signed_url": "https://storage.googleapis.com/presigner/XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX?Expires=1492484353&GoogleAccessId=example%40xxx.iam.gserviceaccount.com&Signature=...",
+  "file_url": "https://example.storage.googleapis.com/XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
+}
+```
+
+- `signed_url`: Endpoint of uploading file.
+- `file_url`: URL of uploaded file.
+
+##### Error case
+
+```json
+{
+  "error": ""
+}
+```
+
+- `error`: Reason of error.
+
+### Upload file
+
+`PUT` to `signed_url`, and write contents of the file to request body.
+
+#### HTTP Header:
+
+```http
+Content-Type: image/jpeg
+Content-Disposition: attachement; filename="example.jpg"
+```
+
+- `Content-Type`: Content type of the file. Same as `content_type` specified when publishing signed-URL.
+- `Content-Disposition`: [Optional] Name given when the file is downloaded.

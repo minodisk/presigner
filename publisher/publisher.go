@@ -13,7 +13,6 @@ import (
 )
 
 type Publisher struct {
-	Filename    string   `json:"filename"`
 	Bucket      string   `json:"bucket"`
 	ContentType string   `json:"content_type"`
 	Headers     []string `json:"headers"`
@@ -59,5 +58,8 @@ func (p Publisher) Publish(o options.Options) (Result, error) {
 
 	res.SignedURL = signed
 	res.FileURL = fmt.Sprintf("https://%s.storage.googleapis.com/%s", p.Bucket, key)
+	if o.Verbose {
+		fmt.Printf("Result: %+v\n", res)
+	}
 	return res, nil
 }
