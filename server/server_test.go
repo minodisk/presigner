@@ -31,6 +31,7 @@ func TestMain(m *testing.M) {
 	opts, err = options.Parse([]string{
 		"-account", "google-auth.json",
 		"-bucket", bucket,
+		"-verbose",
 	})
 	if err != nil {
 		panic(fmt.Sprintf("fail to initialize Account: %v", err))
