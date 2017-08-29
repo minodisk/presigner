@@ -2,6 +2,7 @@ package publisher_test
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -9,6 +10,7 @@ import (
 	"path"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/minodisk/presigner/options"
 	"github.com/minodisk/presigner/publisher"
@@ -16,19 +18,13 @@ import (
 
 var (
 	authJSON = os.Getenv("GOOGLE_AUTH_JSON")
+	account  options.Account
 	bucket   = os.Getenv("PRESIGNER_BUCKET")
-	opts     options.Options
 )
 
 func TestMain(m *testing.M) {
-	var err error
-	if err := ioutil.WriteFile("google-auth.json", []byte(authJSON), 0644); err != nil {
-		panic(err)
-	}
-	opts, err = options.Parse([]string{
-		"-account", "google-auth.json",
-		"-bucket", bucket,
-	})
+	account = options.Account{}
+	err := json.Unmarshal([]byte(authJSON), &account)
 	if err != nil {
 		panic(fmt.Sprintf("fail to initialize Account: %v", err))
 	}
@@ -49,8 +45,26 @@ func TestPublishAndUpload(t *testing.T) {
 		ext         string
 	}{
 		{
-			name:        "sign without param",
-			pub:         publisher.Publisher{opts},
+			name: "sign without param",
+			pub: publisher.Publisher{options.Options{
+				ServiceAccount: account,
+				Bucket:         bucket,
+				Duration:       time.Minute,
+			}},
+			params:      publisher.Params{},
+			header:      http.Header{},
+			data:        "foo",
+			disposition: "",
+			ext:         "",
+		},
+		{
+			name: "setup with ObjectPrefix",
+			pub: publisher.Publisher{options.Options{
+				ServiceAccount: account,
+				Bucket:         bucket,
+				Duration:       time.Minute,
+				ObjectPrefix:   "foo/",
+			}},
 			params:      publisher.Params{},
 			header:      http.Header{},
 			data:        "foo",
@@ -59,7 +73,11 @@ func TestPublishAndUpload(t *testing.T) {
 		},
 		{
 			name: "sign with ContentType",
-			pub:  publisher.Publisher{opts},
+			pub: publisher.Publisher{options.Options{
+				ServiceAccount: account,
+				Bucket:         bucket,
+				Duration:       time.Minute,
+			}},
 			params: publisher.Params{
 				ContentType: "text/plain",
 			},
@@ -72,7 +90,11 @@ func TestPublishAndUpload(t *testing.T) {
 		},
 		{
 			name: "sign with param Filename",
-			pub:  publisher.Publisher{opts},
+			pub: publisher.Publisher{options.Options{
+				ServiceAccount: account,
+				Bucket:         bucket,
+				Duration:       time.Minute,
+			}},
 			params: publisher.Params{
 				Filename: "baz.txt",
 			},
@@ -82,8 +104,12 @@ func TestPublishAndUpload(t *testing.T) {
 			ext:         ".txt",
 		},
 		{
-			name:   "upload with Content-Disposition",
-			pub:    publisher.Publisher{opts},
+			name: "upload with Content-Disposition",
+			pub: publisher.Publisher{options.Options{
+				ServiceAccount: account,
+				Bucket:         bucket,
+				Duration:       time.Minute,
+			}},
 			params: publisher.Params{},
 			header: http.Header{
 				"Content-Disposition": []string{"attachment; filename=qux.txt"},
@@ -126,8 +152,15 @@ func TestPublishAndUpload(t *testing.T) {
 			})
 
 			t.Run("FileURL", func(t *testing.T) {
-				if !strings.HasPrefix(res.FileURL, "https://presigner.storage.googleapis.com/") {
-					t.Errorf("FileURL does not have correct prefix: %s", res.FileURL)
+				{
+					got := res.FileURL
+					want := fmt.Sprintf("https://presigner.storage.googleapis.com/%s", c.pub.Options.ObjectPrefix)
+					fmt.Println("-----------------------")
+					fmt.Println("got :", got)
+					fmt.Println("want:", want)
+					if !strings.HasPrefix(got, want) {
+						t.Errorf("FileURL does not have correct prefix: got %s, want %s", got, want)
+					}
 				}
 				{
 					got := path.Ext(res.FileURL)
