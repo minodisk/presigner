@@ -12,10 +12,15 @@ import (
 	"github.com/minodisk/presigner/publisher"
 )
 
+var (
+	pub publisher.Publisher
+)
+
 func Serve(o options.Options) (err error) {
 	if o.Verbose {
 		fmt.Printf("Options: %+v\n", o)
 	}
+	pub = publisher.Publisher{o}
 	http.Handle("/", Index{o})
 	fmt.Printf("listening on port %d\n", o.Port)
 	return http.ListenAndServe(fmt.Sprintf(":%d", o.Port), nil)
@@ -35,14 +40,14 @@ func (i Index) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				return nil, NewBadRequest(err)
 			}
-			var pub publisher.Publisher
-			if err = json.Unmarshal(b, &pub); err != nil {
+			var params publisher.Params
+			if err = json.Unmarshal(b, &params); err != nil {
 				return nil, NewBadRequest(err)
 			}
 			if i.Options.Verbose {
-				fmt.Printf("Publisher: %+v\n", pub)
+				fmt.Printf("Publisher: %+v\n", params)
 			}
-			res, err := pub.Publish(i.Options)
+			res, err := pub.Publish(params)
 			if err != nil {
 				return nil, NewBadRequest(err)
 			}

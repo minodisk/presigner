@@ -62,28 +62,7 @@ func TestFullfillment(t *testing.T) {
 				"-account", pathToAccount,
 			},
 			options.Options{
-				Buckets:  options.Buckets{},
-				Duration: time.Minute,
-				Port:     80,
-				ServiceAccount: options.Account{
-					ClientEmail: "test@example.com",
-					PrivateKey:  "xxxxxxxxxx\nyyyyyyyyyy\nzzzzzzzzzz\n",
-				},
-				Verbose: false,
-			},
-		},
-		{
-			"multi buckets",
-			[]string{
-				"-account", pathToAccount,
-				"-bucket", "bucket-a",
-				"-bucket", "bucket-b",
-			},
-			options.Options{
-				Buckets: options.Buckets{
-					"bucket-a",
-					"bucket-b",
-				},
+				Bucket:   "",
 				Duration: time.Minute,
 				Port:     80,
 				ServiceAccount: options.Account{
@@ -102,9 +81,7 @@ func TestFullfillment(t *testing.T) {
 				"-port", "8080",
 			},
 			options.Options{
-				Buckets: options.Buckets{
-					"bucket-a",
-				},
+				Bucket:   "bucket-a",
 				Duration: time.Hour,
 				Port:     8080,
 				ServiceAccount: options.Account{
