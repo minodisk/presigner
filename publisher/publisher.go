@@ -3,6 +3,7 @@ package publisher
 import (
 	"fmt"
 	"net/http"
+	"path/filepath"
 	"time"
 
 	"cloud.google.com/go/storage"
@@ -12,9 +13,9 @@ import (
 	"github.com/satori/go.uuid"
 )
 
-type Publisher struct {
-	Bucket      string   `json:"bucket"`
+type Params struct {
 	ContentType string   `json:"content_type"`
+	Filename    string   `json:"filename"`
 	Headers     []string `json:"headers"`
 	MD5         string   `json:"md5"`
 }
@@ -24,41 +25,38 @@ type Result struct {
 	FileURL   string `json:"file_url"`
 }
 
-func (p Publisher) Publish(o options.Options) (Result, error) {
+type Publisher struct {
+	Options options.Options
+}
+
+func (p Publisher) Publish(params Params) (Result, error) {
 	var res Result
 
-	if p.Bucket == "" {
-		return res, fmt.Errorf("bucket is empty")
-	}
-	if !o.Buckets.Contains(p.Bucket) {
-		return res, fmt.Errorf("the bucket %s is not allowed to sign", p.Bucket)
-	}
-
-	expiration := time.Now().Add(o.Duration)
+	expiration := time.Now().Add(p.Options.Duration)
 	opts := storage.SignedURLOptions{
-		GoogleAccessID: o.ServiceAccount.ClientEmail,
-		PrivateKey:     []byte(o.ServiceAccount.PrivateKey),
+		GoogleAccessID: p.Options.ServiceAccount.ClientEmail,
+		PrivateKey:     []byte(p.Options.ServiceAccount.PrivateKey),
 		Method:         http.MethodPut,
 		Expires:        expiration,
-		ContentType:    p.ContentType,
-		Headers:        p.Headers,
+		ContentType:    params.ContentType,
+		Headers:        params.Headers,
 	}
-	if p.MD5 != "" {
-		opts.MD5 = []byte(p.MD5)
+	if params.MD5 != "" {
+		opts.MD5 = []byte(params.MD5)
 	}
 
-	key := uuid.NewV4().String()
-	if o.Verbose {
-		fmt.Printf("Sign with:\n  Bucket: %s\n  Key: %s\n  SingedURLOptions: %+v\n", p.Bucket, key, opts)
+	key := p.Options.ObjectPrefix + uuid.NewV4().String() + filepath.Ext(params.Filename)
+	if p.Options.Verbose {
+		fmt.Printf("Sign with:\n  Key: %s\n  SingedURLOptions: %+v\n", key, opts)
 	}
-	signed, err := storage.SignedURL(p.Bucket, key, &opts)
+	signed, err := storage.SignedURL(p.Options.Bucket, key, &opts)
 	if err != nil {
 		return res, errors.Wrap(err, "fail to sign")
 	}
 
 	res.SignedURL = signed
-	res.FileURL = fmt.Sprintf("https://%s.storage.googleapis.com/%s", p.Bucket, key)
-	if o.Verbose {
+	res.FileURL = fmt.Sprintf("https://%s.storage.googleapis.com/%s", p.Options.Bucket, key)
+	if p.Options.Verbose {
 		fmt.Printf("Result: %+v\n", res)
 	}
 	return res, nil

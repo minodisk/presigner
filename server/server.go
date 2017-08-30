@@ -35,14 +35,15 @@ func (i Index) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				return nil, NewBadRequest(err)
 			}
-			var pub publisher.Publisher
-			if err = json.Unmarshal(b, &pub); err != nil {
+			var params publisher.Params
+			if err = json.Unmarshal(b, &params); err != nil {
 				return nil, NewBadRequest(err)
 			}
 			if i.Options.Verbose {
-				fmt.Printf("Publisher: %+v\n", pub)
+				fmt.Printf("Publisher: %+v\n", params)
 			}
-			res, err := pub.Publish(i.Options)
+			pub := publisher.Publisher{i.Options}
+			res, err := pub.Publish(params)
 			if err != nil {
 				return nil, NewBadRequest(err)
 			}
@@ -57,16 +58,15 @@ func (i Index) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	header := w.Header()
-	// header.Set("Access-Control-Allow-Origin", "*")
-	// header.Set("Access-Control-Allow-Methods", "POST, OPTIONS")
-	// header.Set("Access-Control-Allow-Headers", "Origin, Content-Type")
-
 	if resp.Body == nil {
 		w.WriteHeader(resp.Code())
 		return
 	}
 
+	header := w.Header()
+	// header.Set("Access-Control-Allow-Origin", "*")
+	// header.Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+	// header.Set("Access-Control-Allow-Headers", "Origin, Content-Type")
 	header.Set("Content-Type", "application/json")
 
 	b, err := json.Marshal(resp.Body)
