@@ -12,15 +12,10 @@ import (
 	"github.com/minodisk/presigner/publisher"
 )
 
-var (
-	pub publisher.Publisher
-)
-
 func Serve(o options.Options) (err error) {
 	if o.Verbose {
 		fmt.Printf("Options: %+v\n", o)
 	}
-	pub = publisher.Publisher{o}
 	http.Handle("/", Index{o})
 	fmt.Printf("listening on port %d\n", o.Port)
 	return http.ListenAndServe(fmt.Sprintf(":%d", o.Port), nil)
@@ -47,6 +42,7 @@ func (i Index) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			if i.Options.Verbose {
 				fmt.Printf("Publisher: %+v\n", params)
 			}
+			pub := publisher.Publisher{i.Options}
 			res, err := pub.Publish(params)
 			if err != nil {
 				return nil, NewBadRequest(err)
@@ -62,16 +58,15 @@ func (i Index) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	header := w.Header()
-	// header.Set("Access-Control-Allow-Origin", "*")
-	// header.Set("Access-Control-Allow-Methods", "POST, OPTIONS")
-	// header.Set("Access-Control-Allow-Headers", "Origin, Content-Type")
-
 	if resp.Body == nil {
 		w.WriteHeader(resp.Code())
 		return
 	}
 
+	header := w.Header()
+	// header.Set("Access-Control-Allow-Origin", "*")
+	// header.Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+	// header.Set("Access-Control-Allow-Headers", "Origin, Content-Type")
 	header.Set("Content-Type", "application/json")
 
 	b, err := json.Marshal(resp.Body)

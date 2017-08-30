@@ -18,8 +18,8 @@ import (
 
 var (
 	authJSON = os.Getenv("GOOGLE_AUTH_JSON")
-	account  options.Account
 	bucket   = os.Getenv("PRESIGNER_BUCKET")
+	account  options.Account
 )
 
 func TestMain(m *testing.M) {
@@ -30,7 +30,6 @@ func TestMain(m *testing.M) {
 	}
 
 	code := m.Run()
-	os.Remove("google-auth.json")
 	os.Exit(code)
 }
 
@@ -155,9 +154,6 @@ func TestPublishAndUpload(t *testing.T) {
 				{
 					got := res.FileURL
 					want := fmt.Sprintf("https://presigner.storage.googleapis.com/%s", c.pub.Options.ObjectPrefix)
-					fmt.Println("-----------------------")
-					fmt.Println("got :", got)
-					fmt.Println("want:", want)
 					if !strings.HasPrefix(got, want) {
 						t.Errorf("FileURL does not have correct prefix: got %s, want %s", got, want)
 					}
