@@ -38,6 +38,7 @@ func TestMain(m *testing.M) {
 		Bucket:         bucket,
 		Duration:       time.Minute,
 		Port:           80,
+		Verbose:        true,
 	}})
 	defer Server.Close()
 	Client = &http.Client{}

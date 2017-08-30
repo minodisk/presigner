@@ -49,6 +49,7 @@ func TestPublishAndUpload(t *testing.T) {
 				ServiceAccount: account,
 				Bucket:         bucket,
 				Duration:       time.Minute,
+				Verbose:        true,
 			}},
 			params:      publisher.Params{},
 			header:      http.Header{},
@@ -63,6 +64,7 @@ func TestPublishAndUpload(t *testing.T) {
 				Bucket:         bucket,
 				Duration:       time.Minute,
 				ObjectPrefix:   "foo/",
+				Verbose:        true,
 			}},
 			params:      publisher.Params{},
 			header:      http.Header{},
@@ -76,6 +78,7 @@ func TestPublishAndUpload(t *testing.T) {
 				ServiceAccount: account,
 				Bucket:         bucket,
 				Duration:       time.Minute,
+				Verbose:        true,
 			}},
 			params: publisher.Params{
 				ContentType: "text/plain",
@@ -93,6 +96,7 @@ func TestPublishAndUpload(t *testing.T) {
 				ServiceAccount: account,
 				Bucket:         bucket,
 				Duration:       time.Minute,
+				Verbose:        true,
 			}},
 			params: publisher.Params{
 				Filename: "baz.txt",
@@ -108,6 +112,7 @@ func TestPublishAndUpload(t *testing.T) {
 				ServiceAccount: account,
 				Bucket:         bucket,
 				Duration:       time.Minute,
+				Verbose:        true,
 			}},
 			params: publisher.Params{},
 			header: http.Header{
