@@ -33,12 +33,12 @@ func TestMain(m *testing.M) {
 	}
 	fmt.Println(account)
 
-	Server = httptest.NewServer(server.Index{options.Options{
-		ServiceAccount: account,
-		Bucket:         bucket,
-		Duration:       time.Minute,
-		Port:           80,
-		Verbose:        true,
+	Server = httptest.NewServer(server.Index{&options.Options{
+		Account:  account,
+		Bucket:   bucket,
+		Duration: time.Minute,
+		Port:     80,
+		Verbose:  true,
 	}})
 	defer Server.Close()
 	Client = &http.Client{}

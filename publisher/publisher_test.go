@@ -45,11 +45,11 @@ func TestPublishAndUpload(t *testing.T) {
 	}{
 		{
 			name: "sign without param",
-			pub: publisher.Publisher{options.Options{
-				ServiceAccount: account,
-				Bucket:         bucket,
-				Duration:       time.Minute,
-				Verbose:        true,
+			pub: publisher.Publisher{&options.Options{
+				Account:  account,
+				Bucket:   bucket,
+				Duration: time.Minute,
+				Verbose:  true,
 			}},
 			params:      publisher.Params{},
 			header:      http.Header{},
@@ -59,12 +59,12 @@ func TestPublishAndUpload(t *testing.T) {
 		},
 		{
 			name: "setup with ObjectPrefix",
-			pub: publisher.Publisher{options.Options{
-				ServiceAccount: account,
-				Bucket:         bucket,
-				Duration:       time.Minute,
-				ObjectPrefix:   "foo/",
-				Verbose:        true,
+			pub: publisher.Publisher{&options.Options{
+				Account:  account,
+				Bucket:   bucket,
+				Duration: time.Minute,
+				Prefix:   "foo/",
+				Verbose:  true,
 			}},
 			params:      publisher.Params{},
 			header:      http.Header{},
@@ -74,11 +74,11 @@ func TestPublishAndUpload(t *testing.T) {
 		},
 		{
 			name: "sign with ContentType",
-			pub: publisher.Publisher{options.Options{
-				ServiceAccount: account,
-				Bucket:         bucket,
-				Duration:       time.Minute,
-				Verbose:        true,
+			pub: publisher.Publisher{&options.Options{
+				Account:  account,
+				Bucket:   bucket,
+				Duration: time.Minute,
+				Verbose:  true,
 			}},
 			params: publisher.Params{
 				ContentType: "text/plain",
@@ -92,11 +92,11 @@ func TestPublishAndUpload(t *testing.T) {
 		},
 		{
 			name: "sign with param Filename",
-			pub: publisher.Publisher{options.Options{
-				ServiceAccount: account,
-				Bucket:         bucket,
-				Duration:       time.Minute,
-				Verbose:        true,
+			pub: publisher.Publisher{&options.Options{
+				Account:  account,
+				Bucket:   bucket,
+				Duration: time.Minute,
+				Verbose:  true,
 			}},
 			params: publisher.Params{
 				Filename: "baz.txt",
@@ -108,11 +108,11 @@ func TestPublishAndUpload(t *testing.T) {
 		},
 		{
 			name: "upload with Content-Disposition",
-			pub: publisher.Publisher{options.Options{
-				ServiceAccount: account,
-				Bucket:         bucket,
-				Duration:       time.Minute,
-				Verbose:        true,
+			pub: publisher.Publisher{&options.Options{
+				Account:  account,
+				Bucket:   bucket,
+				Duration: time.Minute,
+				Verbose:  true,
 			}},
 			params: publisher.Params{},
 			header: http.Header{
@@ -158,7 +158,7 @@ func TestPublishAndUpload(t *testing.T) {
 			t.Run("FileURL", func(t *testing.T) {
 				{
 					got := res.FileURL
-					want := fmt.Sprintf("https://presigner.storage.googleapis.com/%s", c.pub.Options.ObjectPrefix)
+					want := fmt.Sprintf("https://presigner.storage.googleapis.com/%s", c.pub.Options.Prefix)
 					if !strings.HasPrefix(got, want) {
 						t.Errorf("FileURL does not have correct prefix: got %s, want %s", got, want)
 					}

@@ -11,14 +11,14 @@ import (
 func main() {
 	if err := _main(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		os.Exit(2)
 	}
 }
 
 func _main() error {
-	o, err := options.Parse(os.Args[1:])
-	if err != nil {
+	o := &options.Options{}
+	if err := o.Parse(os.Args[1:]); err != nil {
 		return err
 	}
-	return server.Serve(o)
+	return server.Start(o)
 }

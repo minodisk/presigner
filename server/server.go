@@ -12,7 +12,7 @@ import (
 	"github.com/minodisk/presigner/publisher"
 )
 
-func Serve(o options.Options) (err error) {
+func Start(o *options.Options) (err error) {
 	if o.Verbose {
 		fmt.Printf("Options: %+v\n", o)
 	}
@@ -22,11 +22,15 @@ func Serve(o options.Options) (err error) {
 }
 
 type Index struct {
-	Options options.Options
+	Options *options.Options
 }
 
 func (i Index) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	resp, err := func(method string, body io.ReadCloser) (*Resp, error) {
+	resp, err := func(host, method string, body io.ReadCloser) (*Resp, error) {
+		if !i.Options.Hosts.Contains(host) {
+			return nil, NewBadRequest(fmt.Errorf("host '%s' isn't allowed", host))
+		}
+
 		switch method {
 		default:
 			return nil, NewMethodNotAllowed(method)
@@ -49,7 +53,7 @@ func (i Index) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 			return NewResp(http.StatusOK, res), nil
 		}
-	}(r.Method, r.Body)
+	}(r.URL.Hostname(), r.Method, r.Body)
 	if err != nil {
 		if coder, ok := err.(Coder); ok {
 			resp = NewErrorResp(coder.Code(), err)

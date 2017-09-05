@@ -41,8 +41,8 @@ func TestParseError(t *testing.T) {
 		c := c
 		t.Run(c.name, func(t *testing.T) {
 			t.Parallel()
-			_, err := options.Parse(c.args)
-			if err == nil {
+			got := &options.Options{}
+			if err := got.Parse(c.args); err == nil {
 				t.Error("should error")
 			}
 		})
@@ -54,24 +54,8 @@ func TestFullfillment(t *testing.T) {
 	for _, c := range []struct {
 		name string
 		args []string
-		want options.Options
+		want *options.Options
 	}{
-		{
-			"with -account",
-			[]string{
-				"-account", pathToAccount,
-			},
-			options.Options{
-				Bucket:   "",
-				Duration: time.Minute,
-				Port:     80,
-				ServiceAccount: options.Account{
-					ClientEmail: "test@example.com",
-					PrivateKey:  "xxxxxxxxxx\nyyyyyyyyyy\nzzzzzzzzzz\n",
-				},
-				Verbose: false,
-			},
-		},
 		{
 			"complex",
 			[]string{
@@ -80,11 +64,11 @@ func TestFullfillment(t *testing.T) {
 				"-duration", "1h",
 				"-port", "8080",
 			},
-			options.Options{
+			&options.Options{
 				Bucket:   "bucket-a",
 				Duration: time.Hour,
 				Port:     8080,
-				ServiceAccount: options.Account{
+				Account: options.Account{
 					ClientEmail: "test@example.com",
 					PrivateKey:  "xxxxxxxxxx\nyyyyyyyyyy\nzzzzzzzzzz\n",
 				},
@@ -95,8 +79,8 @@ func TestFullfillment(t *testing.T) {
 		c := c
 		t.Run(c.name, func(t *testing.T) {
 			t.Parallel()
-			got, err := options.Parse(c.args)
-			if err != nil {
+			got := &options.Options{}
+			if err := got.Parse(c.args); err != nil {
 				t.Fatalf("shouldn't error: %v\nwith args: %v", err, c.args)
 			}
 			if !reflect.DeepEqual(got, c.want) {

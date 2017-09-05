@@ -1,46 +1,98 @@
 package options
 
 import (
+	"encoding/json"
 	"flag"
-	"fmt"
 	"os"
 	"time"
 )
 
-type Options struct {
-	Bucket         string
-	Duration       time.Duration
-	Port           int
-	ServiceAccount Account
-	ObjectPrefix   string
-	Verbose        bool
+const (
+	EnvGoogleAuthJSON = "GOOGLE_AUTH_JSON"
+
+	EnvGoogleApplicationCredentials = "GOOGLE_APPLICATION_CREDENTIALS"
+	EnvAccount                      = "PRESIGNER_ACCOUNT"
+	EnvBucket                       = "PRESIGNER_BUCKET"
+	EnvHost                         = "PRESIGNER_HOST"
+	EnvPort                         = "PRESIGNER_PORT"
+	EnvPrefix                       = "RRESIGNER_PREFIX"
+	EnvVerbose                      = "PRESIGNER_VERBOSE"
+
+	FlagAccount = "account"
+	FlagBucket  = "bucket"
+	FlagHost    = "host"
+	FlagPort    = "port"
+	FlagPrefix  = "prefix"
+	FlagVerbose = "verbose"
+)
+
+var (
+	Envs = []string{
+		EnvGoogleApplicationCredentials,
+		EnvAccount,
+		EnvBucket,
+		EnvHost,
+		EnvPort,
+		EnvPrefix,
+		EnvVerbose,
+	}
+	Flags = []string{
+		FlagAccount,
+		FlagAccount,
+		FlagBucket,
+		FlagHost,
+		FlagPort,
+		FlagPrefix,
+		FlagVerbose,
+	}
+	EnvFlagMap = map[string]string{}
+)
+
+func init() {
+	for i, env := range Envs {
+		EnvFlagMap[env] = Flags[i]
+	}
 }
 
-func Parse(args []string) (Options, error) {
-	o := Options{
-		ServiceAccount: Account{},
-	}
+type Options struct {
+	Account  Account
+	Bucket   string
+	Duration time.Duration
+	Hosts    Hosts
+	Port     int
+	Prefix   string
+	Verbose  bool
+}
 
+func (o *Options) Parse(args []string) error {
 	fs := flag.NewFlagSet("presigner", flag.ContinueOnError)
-	fs.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage:\n")
-		fmt.Fprintf(os.Stderr, "  presigner [options]\n")
-		fmt.Fprintf(os.Stderr, "\n")
-		fmt.Fprintf(os.Stderr, "Options:\n")
-		fs.PrintDefaults()
-	}
-	fs.StringVar(&o.Bucket, "bucket", "", `Allowed buckets to publish pre-signed URL.
-         When this flag is empty, allows any buckets to publish.
-         You can set multi bucket with:
-            $ presigner -bucket foo -bucket bar`)
+	fs.Var(&o.Account, "account", `Path to the file of Google service account JSON.`)
+	fs.StringVar(&o.Bucket, "bucket", "", `Bucket name of Google Cloud Storage to upload files.`)
 	fs.DurationVar(&o.Duration, "duration", time.Minute, `Available duration of published signature.
          `)
 	fs.IntVar(&o.Port, "port", 80, `TCP address to listen on.
          `)
-	fs.Var(&o.ServiceAccount, "account", `Path to the file of Google service account JSON.`)
-	fs.StringVar(&o.ObjectPrefix, "prefix", "", `Prefix of object`)
+	fs.StringVar(&o.Prefix, "prefix", "", `Prefix of object`)
 	fs.BoolVar(&o.Verbose, "verbose", false, `Verbose output.
          `)
 
-	return o, fs.Parse(args)
+	if v := os.Getenv(EnvGoogleAuthJSON); v != "" {
+		b := []byte(v)
+		if err := json.Unmarshal(b, &o.Account); err != nil {
+			return err
+		}
+		// o.Account.Path = filepath.Join(os.TempDir(), "presigner-google-auth.json")
+		// if err := ioutil.WriteFile(o.Account.Path, b, 0644); err != nil {
+		// 	return err
+		// }
+	}
+	for _, env := range Envs {
+		flag := EnvFlagMap[env]
+		if v := os.Getenv(env); v != "" {
+			if err := fs.Set(flag, v); err != nil {
+				return err
+			}
+		}
+	}
+	return fs.Parse(args)
 }

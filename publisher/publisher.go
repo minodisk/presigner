@@ -26,7 +26,7 @@ type Result struct {
 }
 
 type Publisher struct {
-	Options options.Options
+	Options *options.Options
 }
 
 func (p Publisher) Publish(params Params) (Result, error) {
@@ -34,8 +34,8 @@ func (p Publisher) Publish(params Params) (Result, error) {
 
 	expiration := time.Now().Add(p.Options.Duration)
 	opts := storage.SignedURLOptions{
-		GoogleAccessID: p.Options.ServiceAccount.ClientEmail,
-		PrivateKey:     []byte(p.Options.ServiceAccount.PrivateKey),
+		GoogleAccessID: p.Options.Account.ClientEmail,
+		PrivateKey:     []byte(p.Options.Account.PrivateKey),
 		Method:         http.MethodPut,
 		Expires:        expiration,
 		ContentType:    params.ContentType,
@@ -45,7 +45,7 @@ func (p Publisher) Publish(params Params) (Result, error) {
 		opts.MD5 = []byte(params.MD5)
 	}
 
-	key := p.Options.ObjectPrefix + uuid.NewV4().String() + filepath.Ext(params.Filename)
+	key := p.Options.Prefix + uuid.NewV4().String() + filepath.Ext(params.Filename)
 	if p.Options.Verbose {
 		fmt.Printf("Sign with:\n  Key: %s\n  SingedURLOptions: %+v\n", key, opts)
 	}

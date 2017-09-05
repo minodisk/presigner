@@ -2,7 +2,6 @@ package options
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"strings"
 
@@ -12,10 +11,11 @@ import (
 type Account struct {
 	ClientEmail string `json:"client_email"`
 	PrivateKey  string `json:"private_key"`
+	ProjectID   string `json:"project_id"`
 }
 
 func (a *Account) String() string {
-	return fmt.Sprintf("%+v", *a)
+	return a.ClientEmail
 }
 
 func (a *Account) Set(path string) error {
@@ -28,7 +28,10 @@ func (a *Account) Set(path string) error {
 	if err != nil {
 		return errors.Wrap(err, "fail to read the file of Google service account JSON")
 	}
-	return json.Unmarshal(b, a)
+	if err := json.Unmarshal(b, a); err != nil {
+		return errors.Wrap(err, "fail to unmarshal JSON")
+	}
+	return nil
 }
 
 func (a *Account) UnmarshalJSON(data []byte) error {
