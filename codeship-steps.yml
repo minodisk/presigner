@@ -2,7 +2,7 @@
   service: presigner
   command: sh test.sh
 
-# - name: release
-#   tag: ^(\d+\.\d+\.\d+)$
-#   service: presigner
-#   command: sh release.sh
+- name: release
+  tag: ^(\d+\.\d+\.\d+)$
+  service: presigner
+  command: sh release.sh
