@@ -62,17 +62,19 @@ func TestFullfillment(t *testing.T) {
 				"-account", pathToAccount,
 				"-bucket", "bucket-a",
 				"-duration", "1h",
+				"-host", "foo.com,bar.com",
 				"-port", "8080",
 			},
 			&options.Options{
-				Bucket:   "bucket-a",
-				Duration: time.Hour,
-				Port:     8080,
 				Account: options.Account{
 					ClientEmail: "test@example.com",
 					PrivateKey:  "xxxxxxxxxx\nyyyyyyyyyy\nzzzzzzzzzz\n",
 				},
-				Verbose: false,
+				Bucket:   "bucket-a",
+				Duration: time.Hour,
+				Hosts:    []string{"foo.com", "bar.com"},
+				Port:     8080,
+				Verbose:  false,
 			},
 		},
 	} {
