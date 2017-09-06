@@ -63,6 +63,7 @@ func TestFullfillment(t *testing.T) {
 				"-bucket", "bucket-a",
 				"-duration", "1h",
 				"-port", "8080",
+				"-prefix", "dir-a/",
 			},
 			&options.Options{
 				Account: options.Account{
@@ -72,6 +73,7 @@ func TestFullfillment(t *testing.T) {
 				Bucket:   "bucket-a",
 				Duration: time.Hour,
 				Port:     8080,
+				Prefix:   "dir-a/",
 				Verbose:  false,
 			},
 		},

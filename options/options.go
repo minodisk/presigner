@@ -16,7 +16,7 @@ const (
 	EnvBucket                       = "PRESIGNER_BUCKET"
 	EnvDuration                     = "PRESIGNER_DURATION"
 	EnvPort                         = "PRESIGNER_PORT"
-	EnvPrefix                       = "RRESIGNER_PREFIX"
+	EnvPrefix                       = "PRESIGNER_PREFIX"
 	EnvVerbose                      = "PRESIGNER_VERBOSE"
 
 	FlagAccount  = "account"
