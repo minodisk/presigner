@@ -27,10 +27,6 @@ type Index struct {
 
 func (i Index) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	resp, err := func(host, method string, body io.ReadCloser) (*Resp, error) {
-		if !i.Options.Hosts.Contains(host) {
-			return nil, NewBadRequest(fmt.Errorf("host '%s' isn't allowed", host))
-		}
-
 		switch method {
 		default:
 			return nil, NewMethodNotAllowed(method)
